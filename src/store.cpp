@@ -7,6 +7,7 @@ Thread safe
 #include "store.hpp"
 #include <FL/Fl_Widget.H>
 
+#include <mutex>
 #include <shared_mutex>
 Store::Store()
 {
