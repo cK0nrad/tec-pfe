@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-Wall -pthread -ggdb3 -std=c++17
+CFLAGS=-Wall -Wextra -pthread -ggdb3 -std=c++17
 
 # OSS - operational support system 
 TARGET=oss

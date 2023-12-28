@@ -11,6 +11,7 @@
 #include <thread>
 #include <vector>
 #include <poll.h>
+#include <memory>
 #define SOCKET_PATH "/tmp/tec_gps.socket"
 
 void handle_client(int client_fd)
