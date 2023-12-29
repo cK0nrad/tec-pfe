@@ -1,10 +1,4 @@
 #define SOCKET_PATH "/tmp/tec_gps.socket"
-
-#include <chrono>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <unistd.h>
-#include <iostream>
 #include "gps.hpp"
 
 GPS::GPS(Store *store) : store(store)
@@ -15,6 +9,12 @@ GPS::GPS(Store *store) : store(store)
 void GPS::start()
 {
     thread = std::thread(&GPS::main_loop, this);
+}
+
+GPS::~GPS()
+{
+    stop();
+    await();
 }
 
 void GPS::main_loop()
@@ -38,7 +38,6 @@ void GPS::run()
         return;
 
     tc += 1;
-    int sock = 0;
     struct sockaddr_un serv_addr;
 
     if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)

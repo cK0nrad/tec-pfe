@@ -43,7 +43,7 @@ void TECTabs::change_tab(int tab)
 }
 
 TECTabs::TECTabs(int x, int y, int w, int h, Store *store, const char *l)
-    : TECGroup(x, y, w, h, l), store(store)
+    : TECGroup(x, y, w, h, l), active_tab(0), store(store)
 {
     active_box = (Fl_Box **)malloc(sizeof(Fl_Box) * TABS_AMMOUNT);
     begin();
@@ -70,11 +70,11 @@ TECTabs::TECTabs(int x, int y, int w, int h, Store *store, const char *l)
     end();
 
     // Write here to prevent layer to be on top of tabs
-    Afficheurs *afficheurs = new Afficheurs(0, 2 * TABS_HEIGHT, WIDTH, HEIGHT - 2 * TABS_HEIGHT);
+    Afficheurs *afficheurs = new Afficheurs(0, 2 * TABS_HEIGHT, WIDTH, HEIGHT - 2 * TABS_HEIGHT, store);
     afficheurs->hide();
     active_box[0] = (Fl_Box *)afficheurs;
 
-    Billetique *billetique = new Billetique(0, 2 * TABS_HEIGHT, WIDTH, HEIGHT - 2 * TABS_HEIGHT);
+    Billetique *billetique = new Billetique(0, 2 * TABS_HEIGHT, WIDTH, HEIGHT - 2 * TABS_HEIGHT, store);
     billetique->hide();
     active_box[1] = (Fl_Box *)billetique;
 
@@ -90,7 +90,7 @@ TECTabs::TECTabs(int x, int y, int w, int h, Store *store, const char *l)
     maintenance->hide();
     active_box[4] = (Fl_Box *)maintenance;
 
-    change_tab(3);
+    active_box[active_tab]->show();
 }
 
 void TECTabs::draw()
@@ -116,11 +116,6 @@ void TECTabs::draw()
 
 TECTabs::~TECTabs()
 {
-    for (int i = 0; i < children(); ++i)
-    {
-        Fl_Widget *w = child(i);
-        delete ((size_t *)w->user_data());
-    }
 
     for (int i = 0; i < TABS_AMMOUNT; ++i)
     {

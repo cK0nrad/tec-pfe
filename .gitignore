@@ -2,3 +2,5 @@
 gps_emiter
 oss
 memo
+out/
+*.o

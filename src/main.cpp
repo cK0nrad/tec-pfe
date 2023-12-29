@@ -1,6 +1,6 @@
 // Include our FLTK headers
 #include <FL/Fl.H>
-#include <FL/Fl_Window.H>
+#include <FL/Fl_Double_Window.H>
 
 // Include our layout header
 #include "layout.hpp"
@@ -14,9 +14,9 @@
 
 int main()
 {
-
     Store *store = new Store();
-    if(!store){
+    if (!store)
+    {
         return 1;
     }
 
@@ -24,10 +24,9 @@ int main()
     GPS *gps_receiver = new GPS(store);
     gps_receiver->start();
 
-    Fl_Window *window = new Fl_Window(WIDTH, HEIGHT);
-    // window->border(false);
+    Fl_Double_Window *window = new Fl_Double_Window(WIDTH, HEIGHT);
     window->color(FL_BLACK);
-
+    window->default_cursor(FL_CURSOR_NONE);
     TECClock *clock = new TECClock(0, 0, WIDTH, TABS_HEIGHT, store);
     clock->color(PRIMARY);
     store->set_line_indicator(clock);
@@ -38,16 +37,14 @@ int main()
 
     window->end();
     window->show();
-
     int err_code = Fl::run();
 
     // Stop GPS thread
     gps_receiver->stop();
-    gps_receiver->await();
-
-    delete custom_tabs;
-    delete clock;
-    delete window;
+    Fl::delete_widget(window);
+    // Fl::delete_widget(custom_tabs);
+    // Fl::delete_widget(clock);
+    delete gps_receiver;
     delete store;
     return err_code;
 }

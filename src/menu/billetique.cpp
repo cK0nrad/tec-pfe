@@ -1,10 +1,11 @@
 #include "billetique.hpp"
 #include "../layout.hpp"
+#include "../store.hpp"
 
 #include <FL/Fl_Button.H>
 #include <FL/fl_draw.H>
 
-#define BUTTON_WIDTH 80
+#define BUTTON_WIDTH 75
 
 // Left, mid and right group
 #define LT_ROW 4
@@ -130,6 +131,8 @@ const Fl_Color KEYS_SIZE[] = {
     50,
     50,
 };
+#define BILLETIQUE_COLLS_LENGTH 6
+const char *BILLETIQUE_COLLS[] = {"LIGNE", "DIR.", "REG.", "ZONE", "VOY.", "ODM"};
 
 // ugly hack to make a container with a cute border
 class LessWhityContainer : public Fl_Group
@@ -146,9 +149,6 @@ public:
         fl_color(SECONDARY_LIGHT);
         fl_line(x() + w() - 2, y() + 2, x() + w() - 2, y() + h() - 2);
         fl_line(x() + 2, y() + h() - 2, x() + w() - 2, y() + h() - 2);
-        fl_color(FL_WHITE);
-        fl_font(FL_HELVETICA, 24);
-        fl_draw((char *)this->user_data(), x() + 2, y() + h() - 5);
         fl_color(FL_BLACK);
         fl_line(x() + 2, y() + 2, x() + w() - 2, y() + 2);
         fl_line(x() + 2, y() + 2, x() + 2, y() + h() - 2);
@@ -156,8 +156,8 @@ public:
 };
 
 // No clue on how this should work so no logic behind buttons
-Billetique::Billetique(int x, int y, int w, int h, const char *l)
-    : Fl_Group(x, y, w, h, l)
+Billetique::Billetique(int x, int y, int w, int h, Store *store, const char *l)
+    : Fl_Group(x, y, w, h, l), store(store)
 {
     begin();
     // bg (could be wrapped before the module but I'm lazy)
@@ -168,18 +168,9 @@ Billetique::Billetique(int x, int y, int w, int h, const char *l)
 
     // col
     LessWhityContainer *col_name = new LessWhityContainer(0, 2 * TABS_HEIGHT, WIDTH, TABS_HEIGHT);
-    col_name->box(FL_DOWN_BOX);
-    col_name->color(SECONDARY);
-    const char *text = "LIGNE DIR. REG. ZONE   VOY.     ODM";
-    col_name->user_data((void *)text);
-    col_name->labelcolor(FL_WHITE);
     col_name->end();
 
     LessWhityContainer *col_val = new LessWhityContainer(0, 3 * TABS_HEIGHT, WIDTH, TABS_HEIGHT);
-    col_val->box(FL_DOWN_BOX);
-    col_val->color(SECONDARY);
-    const char *text2 = "3820     R     45     01     0028     0412";
-    col_val->user_data((void *)text2);
     col_val->end();
 
     size_t loc = 0;
@@ -231,7 +222,6 @@ Billetique::Billetique(int x, int y, int w, int h, const char *l)
         y_pos = y_pos_init;
         x_pos += BUTTON_WIDTH + 1;
     }
-    printf("x_pos: %ld\n", x_pos);
 
     y_pos = y_pos_init;
     x_pos += size_t(BUTTON_WIDTH / 2);
@@ -256,6 +246,34 @@ Billetique::Billetique(int x, int y, int w, int h, const char *l)
 
 void Billetique::draw()
 {
-    Fl_Group::draw_children();
     Fl_Group::draw();
+
+    size_t offset_x = 2;
+    fl_font(FL_BOLD, 14);
+    int dx, dy, W1, W2, H;
+
+    char **values = (char **)malloc(sizeof(char *) * 6);
+    values[0] = (char *)store->get_current_line();
+    values[1] = (char *)store->get_dir();
+    values[2] = (char *)store->get_region();
+    values[3] = (char *)store->get_zone();
+    values[4] = (char *)store->get_voyage();
+    values[5] = (char *)store->get_odm();
+
+    for (size_t a = 0; a < BILLETIQUE_COLLS_LENGTH; a++)
+    {
+        fl_text_extents(BILLETIQUE_COLLS[a], dx, dy, W1, H);
+        fl_text_extents(values[a], dx, dy, W2, H);
+        if (W2 > W1)
+            W1 = W2;
+
+        W1 += 20;
+
+        fl_color(FL_WHITE);
+        fl_draw(BILLETIQUE_COLLS[a], offset_x, 2 * TABS_HEIGHT, W1, TABS_HEIGHT, FL_ALIGN_LEFT);
+        fl_draw(values[a], offset_x, 3 * TABS_HEIGHT, W1, TABS_HEIGHT, FL_ALIGN_LEFT);
+        offset_x += W1;
+    }
+
+    free(values);
 }

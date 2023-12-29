@@ -10,6 +10,6 @@ const Fl_Color PRIMARY = FL_BLACK;
 #define WIDTH 800
 #define HEIGHT 480
 
-#define TABS_HEIGHT 30
+#define TABS_HEIGHT 40
 
 #endif
