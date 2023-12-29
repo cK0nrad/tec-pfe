@@ -16,6 +16,22 @@
 static const int AFFICEHURS_KEYPADS[13] = {0, 1, 2, 3, 4, 10, 5, 6, 7, 8, 9, 11, 12};
 static const char *AFFICEHURS_KEYPADS_LABEL[12] = {"0", "1", "2", "3", "4", "←", "5", "6", "7", "8", "9", ""};
 
+int max_vertical_scroll(Fl_Scroll *scroller)
+{
+    int max_y = 0;
+    for (int i = 0; i < scroller->children(); ++i)
+    {
+        Fl_Widget *w = scroller->child(i);
+        int y_extent = w->y() + w->h();
+        if (y_extent > max_y)
+        {
+            max_y = y_extent;
+        }
+    }
+    return max_y - scroller->h();
+}
+
+
 static void touch_button(Fl_Widget *widget, void *data)
 {
     int button_number = *(int *)data;
@@ -125,7 +141,7 @@ void Afficheurs::find_afficheur()
         strcat(line, ": ");
         strcat(line, a->get_text());
 
-        Fl_Button *new_button = new Fl_Button(middle_point_x - 2 * (int)(POPUP_WIDTH * .8 * .5), middle_point_y - POPUP_HEIGHT + y_position, 2 * (int)(POPUP_WIDTH * .8), 50, line);
+        DragButton *new_button = new DragButton(middle_point_x - 2 * (int)(POPUP_WIDTH * .8 * .5), middle_point_y - POPUP_HEIGHT + y_position, 2 * (int)(POPUP_WIDTH * .8), 50, line);
         new_button->box(FL_BORDER_BOX);
         new_button->selection_color(FL_DARK_BLUE);
 
@@ -133,11 +149,22 @@ void Afficheurs::find_afficheur()
         val->parent = this;
         val->ptr = (void *)idx++;
 
+        // when draging;
+
         new_button->callback(change_selection, (void *)val);
+
         scroller->add(new_button);
         afficheur_btn.push_back(new_button);
         y_position += 50;
     }
+
+    int max_scroll = max_vertical_scroll(scroller);
+
+    for (auto a : afficheur_btn)
+    {
+        a->set_max_size(max_scroll);
+    }
+
 
     scroller->init_sizes();
     scroller->show();
@@ -149,7 +176,7 @@ void Afficheurs::find_afficheur()
 }
 
 Afficheurs::Afficheurs(int x, int y, int w, int h, Store *store, const char *l)
-    : Fl_Group(x, y, w, h, l), popup(false), afficheur_btn(std::list<Fl_Button *>()), active_button(0), store(store)
+    : Fl_Group(x, y, w, h, l), popup(false), afficheur_btn(std::list<DragButton *>()), active_button(0), store(store)
 {
     begin();
     afficheur_id = std::list<int>();
@@ -336,6 +363,8 @@ void Afficheurs::draw()
         {
             quit->redraw();
             scroller->redraw();
+            add_aff->redraw();
+            replace_aff->redraw();
         }
     }
 }

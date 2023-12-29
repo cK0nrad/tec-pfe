@@ -13,10 +13,10 @@ TARGETS=sqlite3.o oss gps_emiter
 LIBS=`fltk-config --cxxflags --ldflags  --use-images --use-gl`
 
 sqlite3.o : sqlite/sqlite3.c
-	$(CC) -o $@ -c $^ -ldl -lsqlite3
+	$(CC) -o $@ -c $^ -ldl
 
 oss: $(OBJECTS)
-	$(CXX) $(CFLAGS) $^ -o $@ $(LIBS)  sqlite3.o -lm -lsqlite3 -ldl
+	$(CXX) $(CFLAGS) $^ -o $@ $(LIBS)  sqlite3.o -lm -ldl
 
 %.o: %.cpp
 	$(CXX) $(CFLAGS) -c $< -o $@
