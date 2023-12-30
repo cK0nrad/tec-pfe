@@ -73,13 +73,15 @@ public:
     void free_popup();
     void change_active(size_t idx);
     void draw();
+    void push_afficheur();
+    void replace_afficheur();
 
 private:
     // popup
     bool popup;
+    std::list<AfficheurData *> *afficheurs;
+    std::list<DragButton *> *afficheur_btn;
     Fl_Scroll *scroller;
-    std::list<AfficheurData *> afficheurs;
-    std::list<DragButton *> afficheur_btn;
     Fl_Button *quit;
     Fl_Button *add_aff;
     Fl_Button *replace_aff;
@@ -87,12 +89,12 @@ private:
 
     // afficheur
     Fl_Button **buttons;
-    std::list<int> afficheur_id;
+    std::list<int> *afficheur_id;
     Store *store;
 };
 typedef struct PassingVal_T
 {
-    void *ptr; //<- work around that'll store size_t as void* don't free it !!
+    void *ptr;
     Afficheurs *parent;
 } PassingVal;
 #endif

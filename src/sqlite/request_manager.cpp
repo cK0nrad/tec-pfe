@@ -14,6 +14,7 @@ extern "C"
 #include <cstring>
 #include <cstdlib>
 
+
 RequstManager::RequstManager() : is_open(false), db(nullptr), errMsg(nullptr), rc(0)
 {
 }
@@ -50,11 +51,11 @@ bool RequstManager::close()
     return true;
 }
 
-// gonna iterate linearly over the results so no need of vec
-std::list<AfficheurData *> RequstManager::get_afficheur(const char *like_name)
+// gonna iterate linearlyover the results anyway so no need of vec
+std::list<AfficheurData *>* RequstManager::get_afficheur(const char *like_name)
 {
     std::unique_lock<std::shared_mutex> lock(mutex);
-    std::list<AfficheurData *> afficheurs = std::list<AfficheurData *>();
+    std::list<AfficheurData *> *afficheurs = new std::list<AfficheurData *>();
     size_t input_size = strlen(like_name);
     if (!is_open || !input_size || input_size > 15)
         return afficheurs;
@@ -86,7 +87,7 @@ std::list<AfficheurData *> RequstManager::get_afficheur(const char *like_name)
         strcpy((char *)line_, line);
 
         AfficheurData *afficheur = new AfficheurData(id_, text_, line_);
-        afficheurs.push_back(afficheur);
+        afficheurs->push_back(afficheur);
     }
     sqlite3_finalize(stmt);
     return afficheurs;

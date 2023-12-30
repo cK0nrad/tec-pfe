@@ -3,6 +3,7 @@
 
 #include "type.hpp"
 #include <shared_mutex>
+#include <list>
 #include <FL/Fl_Widget.H>
 #include "sqlite/request_manager.hpp"
 
@@ -26,6 +27,10 @@ public:
     void set_voyage(const char *voyage);
     void set_odm(const char *odm);
 
+    void push_girouette(AfficheurData *girouette);
+    void replace_girouette(AfficheurData *girouette);
+    void change_girouette(size_t idx);
+
     // Getters
     const GpsState *get_gps_state() const;
     bool is_line_active() const;
@@ -36,6 +41,9 @@ public:
     const char *get_zone() const;
     const char *get_voyage() const;
     const char *get_odm() const;
+
+    const AfficheurData *get_current_girouette() const;
+    const std::list<AfficheurData *> *get_girouettes() const;
 
     // independant thread safety
     RequstManager *get_request_manager();
@@ -52,12 +60,16 @@ private:
     char *zone = nullptr;
     char *voyage = nullptr; // trip_id
     char *odm = nullptr;    // ordre de marche ? unknown for now
+    std::list<AfficheurData *> *afficheurs;
+    AfficheurData *current_girouette;
 
     // tiny hack to refresh the gui has the store is updated
     // idk if there is a better way to do this (wraping into
     // a widget linked to the store each sub-module?)
-    Fl_Widget *active_widget = nullptr;
-    Fl_Widget *line_indicator = nullptr;
+    Fl_Widget *active_widget;
+    bool has_active;
+    Fl_Widget *line_indicator;
+    bool line_indicator_active;
 };
 
 #endif

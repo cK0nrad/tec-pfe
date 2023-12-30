@@ -1,9 +1,10 @@
 #define SOCKET_PATH "/tmp/tec_gps.socket"
 #include "gps.hpp"
 
-GPS::GPS(Store *store) : store(store)
+#define WAIT_AFTER_ERROR 5 //[s]
+
+GPS::GPS(Store *store) : store(store), tc(0), stop_flag(0)
 {
-    tc = 0;
 }
 
 void GPS::start()
@@ -24,8 +25,8 @@ void GPS::main_loop()
     {
         run();
         tc -= 1;
-        std::this_thread::sleep_for(std::chrono::seconds(5));
         store->set_gps_status(GPSStatus::ERROR);
+        std::this_thread::sleep_for(std::chrono::seconds(WAIT_AFTER_ERROR));
     }
 }
 
@@ -85,7 +86,8 @@ void GPS::run()
 }
 void GPS::await()
 {
-    thread.join();
+    if (thread.joinable())
+        thread.join();
 }
 
 // no concurrent access so no need for rw lock

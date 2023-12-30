@@ -1,4 +1,5 @@
 #include "afficheurs.hpp"
+#include "../sqlite/afficheur_data.hpp"
 #include "../layout.hpp"
 #include "../store.hpp"
 
@@ -30,7 +31,6 @@ int max_vertical_scroll(Fl_Scroll *scroller)
     }
     return max_y - scroller->h();
 }
-
 
 static void touch_button(Fl_Widget *widget, void *data)
 {
@@ -70,9 +70,49 @@ static void change_selection(Fl_Widget *, void *val)
     ((Afficheurs *)(ptr->parent))->change_active((size_t)ptr->ptr);
 }
 
+static void push_girouette_cb(Fl_Widget *, void *val)
+{
+    Afficheurs *ptr = (Afficheurs *)val;
+    ptr->push_afficheur();
+}
+
+static void replace_aff_cb(Fl_Widget *, void *val)
+{
+    Afficheurs *ptr = (Afficheurs *)val;
+    ptr->replace_afficheur();
+}
+
+void Afficheurs::replace_afficheur()
+{
+    if (!popup)
+        return;
+
+    if (!afficheurs || afficheurs->size() == 0)
+        return;
+
+    printf("replace\n");
+    AfficheurData *afficheur = (*std::next(afficheurs->begin(), active_button));
+    store->replace_girouette(afficheur);
+    free_popup();
+}
+
+void Afficheurs::push_afficheur()
+{
+    if (!popup)
+        return;
+
+    if (!afficheurs || afficheurs->size() == 0)
+        return;
+
+    printf("pushing\n");
+    AfficheurData *afficheur = (*std::next(afficheurs->begin(), active_button));
+    store->push_girouette(afficheur);
+    free_popup();
+}
+
 void Afficheurs::change_active(size_t idx)
 {
-    if (!popup || idx > afficheur_btn.size() || idx == active_button)
+    if (!popup || idx > afficheur_btn->size() || idx == active_button)
         return;
     active_button = idx;
     redraw();
@@ -84,17 +124,17 @@ void Afficheurs::free_popup()
         return;
 
     // free our afficheurs list
-    for (auto a : afficheur_btn)
+    for (auto a : *afficheur_btn)
     {
         free(a->user_data());
         scroller->remove(a);
     }
 
-    for (auto a : afficheurs)
+    for (auto a : *afficheurs)
         delete a;
 
-    afficheurs.clear();
-    afficheur_btn.clear();
+    afficheurs->clear();
+    afficheur_btn->clear();
 
     for (size_t a = 0; a < (10 + 2 + 2); a++)
         buttons[a]->activate();
@@ -118,6 +158,13 @@ void Afficheurs::find_afficheur()
     }
 
     const char *id = get_afficheur_id();
+    if (afficheurs)
+    {
+        for (auto a : *afficheurs)
+            delete a;
+        afficheurs->clear();
+        delete afficheurs;
+    }
     afficheurs = store->get_request_manager()->get_afficheur(id);
     free((void *)id);
 
@@ -126,7 +173,7 @@ void Afficheurs::find_afficheur()
 
     size_t y_position = TABS_HEIGHT;
     size_t idx = 0;
-    for (auto a : afficheurs)
+    for (auto a : *afficheurs)
     {
         size_t id_size = strlen(a->get_id());
         size_t line_size = strlen(a->get_line());
@@ -154,17 +201,16 @@ void Afficheurs::find_afficheur()
         new_button->callback(change_selection, (void *)val);
 
         scroller->add(new_button);
-        afficheur_btn.push_back(new_button);
+        afficheur_btn->push_back(new_button);
         y_position += 50;
     }
 
     int max_scroll = max_vertical_scroll(scroller);
 
-    for (auto a : afficheur_btn)
+    for (auto a : *afficheur_btn)
     {
         a->set_max_size(max_scroll);
     }
-
 
     scroller->init_sizes();
     scroller->show();
@@ -176,10 +222,11 @@ void Afficheurs::find_afficheur()
 }
 
 Afficheurs::Afficheurs(int x, int y, int w, int h, Store *store, const char *l)
-    : Fl_Group(x, y, w, h, l), popup(false), afficheur_btn(std::list<DragButton *>()), active_button(0), store(store)
+    : Fl_Group(x, y, w, h, l), popup(false), afficheurs(new std::list<AfficheurData *>()), afficheur_btn(new std::list<DragButton *>()), active_button(0), store(store)
 {
     begin();
-    afficheur_id = std::list<int>();
+
+    afficheur_id = new std::list<int>();
 
     Fl_Group *menu = new Fl_Group(0, 2 * TABS_HEIGHT, WIDTH, HEIGHT - 2 * TABS_HEIGHT);
     menu->box(FL_FLAT_BOX);
@@ -246,11 +293,13 @@ Afficheurs::Afficheurs(int x, int y, int w, int h, Store *store, const char *l)
     add_aff = new Fl_Button(middle_point_x - POPUP_WIDTH - 1, middle_point_y + POPUP_HEIGHT + TABS_HEIGHT + 1, POPUP_WIDTH / 2, TABS_HEIGHT, "Ajouter");
     add_aff->labelsize(20);
     add_aff->box(FL_BORDER_BOX);
+    add_aff->callback(push_girouette_cb, this);
     add_aff->hide();
 
     replace_aff = new Fl_Button(middle_point_x + POPUP_WIDTH - (POPUP_WIDTH / 2) + 3, middle_point_y + POPUP_HEIGHT + TABS_HEIGHT + 1, POPUP_WIDTH / 2, TABS_HEIGHT, "Remplacer");
     replace_aff->labelsize(20);
     replace_aff->box(FL_BORDER_BOX);
+    replace_aff->callback(replace_aff_cb, this);
     replace_aff->hide();
 }
 
@@ -261,6 +310,34 @@ Afficheurs::~Afficheurs()
     {
         delete buttons[a];
     }
+    delete afficheur_id;
+
+    if (afficheurs && afficheurs->size() > 0)
+    {
+        for (auto a : *afficheurs)
+            delete a;
+        afficheurs->clear();
+    }
+    delete afficheurs;
+
+    if (afficheur_btn && afficheur_btn->size() > 0)
+    {
+        for (auto a : *afficheur_btn)
+            delete a;
+        afficheur_btn->clear();
+    }
+    delete afficheur_btn;
+
+    if (afficheur_id && afficheur_id->size() > 0)
+    {
+        afficheur_id->clear();
+    }
+
+    Fl::delete_widget(scroller);
+    Fl::delete_widget(quit);
+    Fl::delete_widget(add_aff);
+    Fl::delete_widget(replace_aff);
+
     free(buttons);
 }
 /////////
@@ -271,21 +348,21 @@ void Afficheurs::add_number(int id)
     if (popup)
         return;
 
-    if (afficheur_id.size() >= AFFICHEUR_HARD_LIMIT)
+    if (afficheur_id->size() >= AFFICHEUR_HARD_LIMIT)
         return;
 
     if (id < 0 || id > 9)
         return;
 
     damage(0x90);
-    afficheur_id.push_back(id);
+    afficheur_id->push_back(id);
 }
 
 char *Afficheurs::get_afficheur_id() const
 {
-    char *buffer = (char *)malloc((sizeof(char)) * (afficheur_id.size() + 1));
+    char *buffer = (char *)malloc((sizeof(char)) * (afficheur_id->size() + 1));
     int i = 0;
-    for (int num : afficheur_id)
+    for (int num : *afficheur_id)
     {
         buffer[i++] = '0' + static_cast<char>(num);
     }
@@ -295,12 +372,12 @@ char *Afficheurs::get_afficheur_id() const
 
 void Afficheurs::pop_afficheur_id()
 {
-    if (afficheur_id.size() == 0)
+    if (afficheur_id->size() == 0)
     {
         redraw();
         return;
     }
-    afficheur_id.pop_back();
+    afficheur_id->pop_back();
     damage(0x90);
 }
 
@@ -327,7 +404,10 @@ void Afficheurs::draw()
     fl_draw("Destination", middle + 1, 2 * TABS_HEIGHT + 4, 70, 20, FL_ALIGN_LEFT);
 
     fl_font(FL_HELVETICA_BOLD, 24);
-    fl_draw("29 - RENTRE AU DEPOT", middle - 3, 2 * TABS_HEIGHT + 13, (int)(WIDTH * 0.75) + 6, 3 * TABS_HEIGHT - 20, FL_ALIGN_CENTER);
+
+    const char *line = store->get_current_girouette()->get_formatter();
+    fl_draw(line, middle - 3, 2 * TABS_HEIGHT + 13, (int)(WIDTH * 0.75) + 6, 3 * TABS_HEIGHT - 20, FL_ALIGN_CENTER);
+    free((void *)line);
 
     if (popup)
     {
@@ -338,7 +418,7 @@ void Afficheurs::draw()
         fl_rect(middle_point_x - POPUP_WIDTH - 1, middle_point_y - POPUP_HEIGHT - 1, 2 * (POPUP_WIDTH + 2), 2 * (POPUP_HEIGHT + 1) + 2 * TABS_HEIGHT, FL_BLACK);
 
         size_t idx = 0;
-        for (auto a : afficheur_btn)
+        for (auto a : *afficheur_btn)
         {
             if (idx++ == active_button)
             {
@@ -351,7 +431,7 @@ void Afficheurs::draw()
                 a->labelcolor(FL_BLACK);
             }
         }
-        if (afficheur_btn.size() == 0)
+        if (afficheur_btn->size() == 0)
         {
             scroller->hide();
             scroller->redraw();

@@ -11,6 +11,7 @@
 #include "gui/time.hpp"
 
 #include "gps/gps.hpp"
+#include "girouette/girouette.hpp"
 
 int main()
 {
@@ -23,6 +24,9 @@ int main()
     // // Start GPS tshread
     GPS *gps_receiver = new GPS(store);
     gps_receiver->start();
+
+    Girouette *girouette = new Girouette(store);
+    girouette->start();
 
     Fl_Double_Window *window = new Fl_Double_Window(WIDTH, HEIGHT);
     window->color(FL_BLACK);
@@ -43,10 +47,13 @@ int main()
 
     // Stop GPS thread
     gps_receiver->stop();
+    girouette->stop();
+    
     Fl::delete_widget(window);
     // Fl::delete_widget(custom_tabs);
     // Fl::delete_widget(clock);
     delete gps_receiver;
+    delete girouette;
     delete store;
     return err_code;
 }

@@ -49,14 +49,22 @@ void Pilotauto::draw()
 
     size_t current_x = 15;
     size_t bottom = h() + y();
+    // odm
     fl_color(SECONDARY_LIGHT);
     fl_rectf(current_x, 3 * TABS_HEIGHT + MARGIN, 75, TABS_HEIGHT);
     current_x += 75 + MARGIN;
+
+    // etat
     fl_rectf(current_x, 3 * TABS_HEIGHT + MARGIN, 250, TABS_HEIGHT);
     current_x += 250 + MARGIN;
+
+    // retard
     fl_rectf(current_x, 3 * TABS_HEIGHT + MARGIN, 75, TABS_HEIGHT);
+
+    // aff exterieur
     fl_rectf(15, 5 * TABS_HEIGHT + MARGIN, 410, TABS_HEIGHT);
 
+    // Arret suivant
     fl_rectf(15, bottom - 2 * TABS_HEIGHT + MARGIN, 50, TABS_HEIGHT);
     fl_rectf(15 + 50 + 5, bottom - 2 * TABS_HEIGHT + MARGIN, 355, TABS_HEIGHT);
 
@@ -90,5 +98,10 @@ void Pilotauto::draw()
     current_x += 250 + MARGIN;
     fl_draw("Retard", current_x, 3 * TABS_HEIGHT);
     fl_draw("Afficheurs extérieurs", 15, 5 * TABS_HEIGHT);
+
+    const char *formatted = store->get_current_girouette()->get_formatter();
+    fl_draw(formatted, 15, 5 * TABS_HEIGHT + MARGIN, 410, TABS_HEIGHT, FL_ALIGN_CENTER);
+    free((void *)formatted);
+
     fl_draw("Arret suivant", 15, bottom - 2 * TABS_HEIGHT);
 }
