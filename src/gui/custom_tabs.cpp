@@ -43,7 +43,7 @@ void TECTabs::change_tab(int tab)
 }
 
 TECTabs::TECTabs(int x, int y, int w, int h, Store *store, const char *l)
-    : TECGroup(x, y, w, h, l), active_tab(0), store(store)
+    : TECGroup(x, y, w, h, l), active_tab(3), store(store)
 {
     active_box = (Fl_Box **)malloc(sizeof(Fl_Box) * TABS_AMMOUNT);
     begin();
@@ -65,6 +65,8 @@ TECTabs::TECTabs(int x, int y, int w, int h, Store *store, const char *l)
         size_t *data = new size_t;
         *data = i;
         btn->user_data(data);
+        if(i==4)
+            btn->deactivate();
         btn->callback(change_tab_cb, data); // pass twice the address to free later
     }
     end();

@@ -7,7 +7,7 @@
 #include "../store.hpp"
 #include "../type.hpp"
 
-#define MARGIN 5
+#define MARGIN 10
 
 const char *started = "LOCALISE";
 const char *errored = "ERREUR GPS";
@@ -51,29 +51,31 @@ void Pilotauto::draw()
     size_t bottom = h() + y();
     // odm
     fl_color(SECONDARY_LIGHT);
-    fl_rectf(current_x, 3 * TABS_HEIGHT + MARGIN, 75, TABS_HEIGHT);
-    current_x += 75 + MARGIN;
+    fl_rectf(current_x, 3 * TABS_HEIGHT + MARGIN, 100, TABS_HEIGHT);
+    current_x += 100 + MARGIN;
 
     // etat
-    fl_rectf(current_x, 3 * TABS_HEIGHT + MARGIN, 250, TABS_HEIGHT);
-    current_x += 250 + MARGIN;
+    fl_rectf(current_x, 3 * TABS_HEIGHT + MARGIN, 350, TABS_HEIGHT);
+    current_x += 350 + MARGIN;
 
     // retard
-    fl_rectf(current_x, 3 * TABS_HEIGHT + MARGIN, 75, TABS_HEIGHT);
+    fl_rectf(current_x, 3 * TABS_HEIGHT + MARGIN, 100, TABS_HEIGHT);
 
     // aff exterieur
-    fl_rectf(15, 5 * TABS_HEIGHT + MARGIN, 410, TABS_HEIGHT);
+    fl_rectf(15, 5 * TABS_HEIGHT + MARGIN, 570, TABS_HEIGHT);
 
     // Arret suivant
-    fl_rectf(15, bottom - 2 * TABS_HEIGHT + MARGIN, 50, TABS_HEIGHT);
-    fl_rectf(15 + 50 + 5, bottom - 2 * TABS_HEIGHT + MARGIN, 355, TABS_HEIGHT);
+    fl_rectf(15, bottom - 2 * TABS_HEIGHT + MARGIN, 75, TABS_HEIGHT);
+    fl_rectf(15 + 75 + MARGIN, bottom - 2 * TABS_HEIGHT + MARGIN, 480, TABS_HEIGHT);
 
     current_x = 15;
     fl_color(FL_WHITE);
-    fl_font(FL_HELVETICA, 14);
+    fl_font(FL_HELVETICA, 20);
+
     fl_draw("ODM", 15, 3 * TABS_HEIGHT);
-    fl_draw(line->odm, 15, 3 * TABS_HEIGHT + MARGIN, 75, TABS_HEIGHT, FL_ALIGN_CENTER);
-    current_x += 75 + MARGIN;
+    fl_draw(line->odm, 15, 3 * TABS_HEIGHT + MARGIN, 100, TABS_HEIGHT, FL_ALIGN_CENTER);
+    current_x += 100 + MARGIN;
+
     fl_draw("Etat", current_x, 3 * TABS_HEIGHT);
 
     GPSStatus status = store->get_gps_state()->get_status();
@@ -93,14 +95,14 @@ void Pilotauto::draw()
         status_text = unknown;
         break;
     }
-    fl_draw(status_text, current_x, 3 * TABS_HEIGHT + MARGIN, 250, TABS_HEIGHT, FL_ALIGN_CENTER);
+    fl_draw(status_text, current_x, 3 * TABS_HEIGHT + MARGIN, 350, TABS_HEIGHT, FL_ALIGN_CENTER);
+    current_x += 350 + MARGIN;
 
-    current_x += 250 + MARGIN;
     fl_draw("Retard", current_x, 3 * TABS_HEIGHT);
     fl_draw("Afficheurs extérieurs", 15, 5 * TABS_HEIGHT);
 
     const char *formatted = store->get_current_girouette()->get_formatter();
-    fl_draw(formatted, 15, 5 * TABS_HEIGHT + MARGIN, 410, TABS_HEIGHT, FL_ALIGN_CENTER);
+    fl_draw(formatted, 15, 5 * TABS_HEIGHT + MARGIN, 560, TABS_HEIGHT, FL_ALIGN_CENTER);
     free((void *)formatted);
 
     fl_draw("Arret suivant", 15, bottom - 2 * TABS_HEIGHT);
