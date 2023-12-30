@@ -14,7 +14,6 @@ extern "C"
 #include <cstring>
 #include <cstdlib>
 
-
 RequstManager::RequstManager() : is_open(false), db(nullptr), errMsg(nullptr), rc(0)
 {
 }
@@ -52,7 +51,7 @@ bool RequstManager::close()
 }
 
 // gonna iterate linearlyover the results anyway so no need of vec
-std::list<AfficheurData *>* RequstManager::get_afficheur(const char *like_name)
+std::list<AfficheurData *> *RequstManager::get_afficheur(const char *like_name)
 {
     std::unique_lock<std::shared_mutex> lock(mutex);
     std::list<AfficheurData *> *afficheurs = new std::list<AfficheurData *>();
@@ -76,7 +75,17 @@ std::list<AfficheurData *>* RequstManager::get_afficheur(const char *like_name)
     {
         const char *id = (const char *)sqlite3_column_text(stmt, 0);
         const char *text = (const char *)sqlite3_column_text(stmt, 1);
-        const char *line = (const char *)sqlite3_column_text(stmt, 2);
+        char *line = nullptr;
+
+        if (sqlite3_column_type(stmt, 2) == SQLITE_NULL)
+        {
+            line = (char *)malloc(sizeof(char) * 2);
+            strcpy(line, "");
+        }
+        else
+        {
+            line = (char*)sqlite3_column_text(stmt, 2);
+        }
 
         const char *id_ = (const char *)malloc(sizeof(char) * (strlen(id) + 1));
         const char *text_ = (const char *)malloc(sizeof(char) * (strlen(text) + 1));
