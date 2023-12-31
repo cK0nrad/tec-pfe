@@ -31,6 +31,8 @@ Pilotauto::Pilotauto(int x, int y, int w, int h, Store *store, const char *l)
     menu->end();
 
     LineState *line = (LineState *)malloc(sizeof(LineState));
+    if (!line)
+        throw std::bad_alloc();
     line->line = (char *)"2";
     line->odm = (char *)"143066";
     line->current_stop = 0;
@@ -99,6 +101,9 @@ void Pilotauto::draw()
     current_x += 350 + MARGIN;
 
     fl_draw("Retard", current_x, 3 * TABS_HEIGHT);
+
+    fl_draw(store->get_delay().c_str(), current_x, 3 * TABS_HEIGHT + MARGIN, 100, TABS_HEIGHT, FL_ALIGN_CENTER);
+
     fl_draw("Afficheurs extérieurs", 15, 5 * TABS_HEIGHT);
 
     const char *formatted = store->get_current_girouette()->get_formatter();
@@ -106,4 +111,6 @@ void Pilotauto::draw()
     free((void *)formatted);
 
     fl_draw("Arret suivant", 15, bottom - 2 * TABS_HEIGHT);
+    fl_draw(store->get_next_stop(), 15 + 75 + MARGIN, bottom - 2 * TABS_HEIGHT + MARGIN, 480, TABS_HEIGHT, FL_ALIGN_CENTER);
+    fl_draw(store->get_next_stop_time(), 15, bottom - 2 * TABS_HEIGHT + MARGIN, 75, TABS_HEIGHT, FL_ALIGN_CENTER);
 }

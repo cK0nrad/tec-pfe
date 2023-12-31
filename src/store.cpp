@@ -14,39 +14,42 @@ This could be splitted into multiple files to improve readability
 #include <shared_mutex>
 #include "sqlite/request_manager.hpp"
 
-Store::Store() : active_widget(nullptr), has_active(false), line_indicator(nullptr), line_indicator_active(false)
+Store::Store() : gps_state(new GpsState(0, 0, GPSStatus::STARTING)),
+                 line_active(false),
+                 next_stop(std::string("HORS SERVICE")),
+                 next_stop_time(std::string("/")),
+                 current_line(std::string("3820213123123")),
+                 dir(std::string("R")),
+                 region(std::string("045")),
+                 zone(std::string("01")),
+                 voyage(std::string("0028")),
+                 odm(std::string("0412")),
+                 active_widget(nullptr),
+                 has_active(false),
+                 line_indicator(nullptr),
+                 line_indicator_active(false)
 {
+    std::string id("01");
+    std::string text("HORS SERVICE");
+    std::string line("");
+
     afficheurs = new std::list<AfficheurData *>();
-    char *id = (char *)malloc(sizeof(char) * 3);
-    char *text = (char *)malloc(sizeof(char) * 13);
-    char *line = (char *)malloc(sizeof(char) * 1);
-    strcpy(id, "01");
-    strcpy(text, "HORS SERVICE");
-    strcpy(line, "");
     current_girouette = new AfficheurData(id, text, line);
     afficheurs->push_back(current_girouette);
 
     request_manager = new RequstManager();
     request_manager->open();
+    //
+    // set_trip(request_manager->get_trip("6191"));
+    set_trip(request_manager->get_trip("6229"));
+}
 
-    gps_state = new GpsState(0, 0, GPSStatus::STARTING);
-
-    current_line = (char *)malloc(sizeof(char) * 14);
-    strcpy(current_line, "3820213123123");
-    dir = (char *)malloc(sizeof(char) * 2);
-    strcpy(dir, "R");
-
-    region = (char *)malloc(sizeof(char) * 4);
-    strcpy(region, "045");
-
-    zone = (char *)malloc(sizeof(char) * 3);
-    strcpy(zone, "01");
-
-    voyage = (char *)malloc(sizeof(char) * 5);
-    strcpy(voyage, "0028");
-
-    odm = (char *)malloc(sizeof(char) * 5);
-    strcpy(odm, "0412");
+void Store::set_next_stop(std::string stop, std::string time)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex);
+    next_stop = stop;
+    next_stop_time = time;
+    refresh_gui();
 }
 
 void Store::set_gps_position(double lat, double long_)
@@ -93,50 +96,45 @@ void Store::refresh_gui()
         active_widget->redraw();
 }
 
-void Store::set_current_line(const char *line)
+void Store::set_current_line(std::string current_line)
 {
     std::unique_lock<std::shared_mutex> lock(mutex);
-    free(current_line);
-    current_line = (char *)line;
+    this->current_line = current_line;
     refresh_gui();
 }
 
-void Store::set_dir(const char *dir)
+void Store::set_dir(std::string dir)
 {
     std::unique_lock<std::shared_mutex> lock(mutex);
-    free(this->dir);
-    this->dir = (char *)dir;
+    this->dir = dir;
     refresh_gui();
 }
 
-void Store::set_region(const char *region)
+void Store::set_region(std::string region)
 {
     std::unique_lock<std::shared_mutex> lock(mutex);
-    free(this->region);
-    this->region = (char *)region;
+    this->region = region;
     refresh_gui();
 }
 
-void Store::set_zone(const char *zone)
+void Store::set_zone(std::string zone)
 {
     std::unique_lock<std::shared_mutex> lock(mutex);
-    this->zone = (char *)zone;
+    this->zone = zone;
     refresh_gui();
 }
 
-void Store::set_voyage(const char *voyage)
+void Store::set_voyage(std::string voyage)
 {
     std::unique_lock<std::shared_mutex> lock(mutex);
-    free(this->voyage);
-    this->voyage = (char *)voyage;
+    this->voyage = voyage;
     refresh_gui();
 }
 
-void Store::set_odm(const char *odm)
+void Store::set_odm(std::string odm)
 {
     std::unique_lock<std::shared_mutex> lock(mutex);
-    free(this->odm);
-    this->odm = (char *)odm;
+    this->odm = odm;
     refresh_gui();
 }
 
@@ -186,37 +184,37 @@ const GpsState *Store::get_gps_state() const
 const char *Store::get_current_line() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
-    return current_line;
+    return current_line.c_str();
 }
 
 const char *Store::get_dir() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
-    return dir;
+    return dir.c_str();
 }
 
 const char *Store::get_region() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
-    return region;
+    return region.c_str();
 }
 
 const char *Store::get_zone() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
-    return zone;
+    return zone.c_str();
 }
 
 const char *Store::get_voyage() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
-    return voyage;
+    return voyage.c_str();
 }
 
 const char *Store::get_odm() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
-    return odm;
+    return odm.c_str();
 }
 
 const AfficheurData *Store::get_current_girouette() const
@@ -231,6 +229,46 @@ const std::list<AfficheurData *> *Store::get_girouettes() const
     return afficheurs;
 }
 
+const TripData *Store::get_current_trip() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex);
+    return current_trip;
+}
+
+const char *Store::get_next_stop() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex);
+    return next_stop.c_str();
+}
+
+const char *Store::get_next_stop_time() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex);
+    return next_stop_time.c_str();
+}
+
+void Store::set_delay(std::string delay)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex);
+    this->delay = delay;
+    refresh_gui();
+}
+
+void Store::set_trip(TripData *trip)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex);
+    current_trip = trip;
+    line_active = true;
+    refresh_gui();
+}
+
+std::string Store::get_delay() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex);
+    return delay;
+}
+
+
 // RM has it's own thread safety
 RequstManager *Store::get_request_manager()
 {
@@ -242,15 +280,11 @@ Store::~Store()
     for (auto it = afficheurs->begin(); it != afficheurs->end(); it++)
         delete *it;
 
+    if (line_active)
+        delete current_trip;
+
     delete afficheurs;
     delete current_girouette;
-
-    free(current_line);
-    free(dir);
-    free(region);
-    free(zone);
-    free(voyage);
-    free(odm);
     delete request_manager;
     delete gps_state;
 }

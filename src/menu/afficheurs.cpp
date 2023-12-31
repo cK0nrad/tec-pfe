@@ -90,7 +90,6 @@ void Afficheurs::replace_afficheur()
     if (!afficheurs || afficheurs->size() == 0)
         return;
 
-    printf("replace\n");
     AfficheurData *afficheur = (*std::next(afficheurs->begin(), active_button));
     store->replace_girouette(afficheur);
     free_popup();
@@ -104,7 +103,6 @@ void Afficheurs::push_afficheur()
     if (!afficheurs || afficheurs->size() == 0)
         return;
 
-    printf("pushing\n");
     AfficheurData *afficheur = (*std::next(afficheurs->begin(), active_button));
     store->push_girouette(afficheur);
     free_popup();
@@ -175,24 +173,32 @@ void Afficheurs::find_afficheur()
     size_t idx = 0;
     for (auto a : *afficheurs)
     {
-        size_t id_size = strlen(a->get_id());
-        size_t line_size = strlen(a->get_line());
-        size_t text_size = strlen(a->get_text());
+        std::string id = a->get_id();
+        std::string line_ = a->get_line();
+        std::string text = a->get_text();
+
+        size_t id_size = id.length();
+        size_t line_size = line_.length();
+        size_t text_size = text.length();
 
         //[id]: [text]\0
         char *line = (char *)malloc(sizeof(char) * (1 + id_size + 2 + line_size + 2 + text_size + 1));
+        if (!line)
+            throw std::bad_alloc();
         strcpy(line, "[");
-        strcat(line, a->get_id());
+        strcat(line, id.c_str());
         strcat(line, "] ");
-        strcat(line, a->get_line());
+        strcat(line, line_.c_str());
         strcat(line, ": ");
-        strcat(line, a->get_text());
+        strcat(line, text.c_str());
 
         DragButton *new_button = new DragButton(middle_point_x - 2 * (int)(POPUP_WIDTH * .8 * .5), middle_point_y - POPUP_HEIGHT + y_position, 2 * (int)(POPUP_WIDTH * .8), 50, line);
         new_button->box(FL_BORDER_BOX);
         new_button->selection_color(FL_DARK_BLUE);
 
         PassingVal *val = (PassingVal *)malloc(sizeof(PassingVal));
+        if (!val)
+            throw std::bad_alloc();
         val->parent = this;
         val->ptr = (void *)idx++;
 
@@ -240,6 +246,9 @@ Afficheurs::Afficheurs(int x, int y, int w, int h, Store *store, const char *l)
 
     size_t pos = 0;
     buttons = (Fl_Button **)malloc(sizeof(Fl_Button *) * (10 + 2 + 2));
+    if (!buttons)
+        throw std::bad_alloc();
+
     Fl_Button *button = nullptr;
 
     size_t offset_y = h + y - 2 * TABS_HEIGHT - BUTTON_SIZE;
@@ -361,6 +370,8 @@ void Afficheurs::add_number(int id)
 char *Afficheurs::get_afficheur_id() const
 {
     char *buffer = (char *)malloc((sizeof(char)) * (afficheur_id->size() + 1));
+    if (!buffer)
+        throw std::bad_alloc();
     int i = 0;
     for (int num : *afficheur_id)
     {

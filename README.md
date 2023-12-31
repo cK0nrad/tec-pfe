@@ -7,6 +7,11 @@ Equivalent to an ITS or OSS.
 Assuming a Linux distros
 Compatible with RaspPI 4
 
+## Intellectual Property Notice
+
+This repository has been published in the absence of any discovered patents or copyright records for terms including "letec pfe," "otw pfe," "srwt pfe," "letec sae," among others in various combinations. Should there exist a patent or any other form of intellectual property that this repository infringes upon, please reach out to me. Upon verification, I will promptly remove the repository.
+
+
 ## Requirements
 
 - FLTK
@@ -47,3 +52,9 @@ It was just a POC, so I did it in few nights (~30h with 6h-8h of fltk doc readin
 
 - TEC employees on TikTok for the UI
 - cKonrad (aka. me)
+
+
+
+ //When emulating, the bus is always on time or always constantly
+            // late or early
+            // Thus whatever the average speed, it'll never change the actual delay

@@ -13,7 +13,7 @@
 #define CLOCK_TEXT_LENGTH 20
 
 const char *service_fermee = "SERVICE FERME";
-const char *service_normal = "SERVICE NORRMAL";
+const char *service_normal = "SERVICE NORMAL";
 
 static void Timer_CB(void *v)
 {
@@ -29,6 +29,9 @@ TECClock::TECClock(int X, int Y, int W, int H, Store *store, const char *L)
     std::time_t rawtime = std::time(nullptr);
     struct tm *timeinfo = std::localtime(&rawtime);
     char *buffer = (char *)malloc(CLOCK_TEXT_LENGTH * sizeof(char));
+    if (!buffer)
+        throw std::bad_alloc();
+
     std::strftime(buffer, CLOCK_TEXT_LENGTH, "%d/%m/%y %H:%M:%S", timeinfo);
     user_data(buffer);
     Fl::add_timeout(1.0, Timer_CB, (void *)this);
@@ -44,6 +47,8 @@ void TECClock::update()
         free((void *)user_data());
 
     char *buffer = (char *)malloc(CLOCK_TEXT_LENGTH * sizeof(char));
+    if (!buffer)
+        throw std::bad_alloc();
     std::strftime(buffer, CLOCK_TEXT_LENGTH, "%d/%m/%y %H:%M:%S", timeinfo);
     user_data(buffer);
     redraw();

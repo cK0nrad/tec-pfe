@@ -175,6 +175,8 @@ Billetique::Billetique(int x, int y, int w, int h, Store *store, const char *l)
 
     size_t loc = 0;
     buttons = (Fl_Button **)malloc(sizeof(Fl_Button) * (8 + 12 + 12));
+    if (!buttons)
+        throw std::bad_alloc();
     Fl_Button *current_button = nullptr;
     /*
         This is indeed a bad flow.
@@ -252,16 +254,27 @@ void Billetique::draw()
     fl_font(FL_BOLD, 14);
     int dx, dy, W1, W2, H;
 
-    char **values = (char **)malloc(sizeof(char *) * 6);
-    values[0] = (char *)store->get_current_line();
-    values[1] = (char *)store->get_dir();
-    values[2] = (char *)store->get_region();
-    values[3] = (char *)store->get_zone();
-    values[4] = (char *)store->get_voyage();
-    values[5] = (char *)store->get_odm();
+    const char **values = (const char **)malloc(sizeof(char *) * 6);
+    if (!values)
+        throw std::bad_alloc();
+
+    if (store->is_line_active())
+    {
+        values[0] = store->get_current_trip()->get_trip_id().c_str();
+    }
+    else
+    {
+        values[0] = "/";
+    }
+    values[1] = store->get_dir();
+    values[2] = store->get_region();
+    values[3] = store->get_zone();
+    values[4] = store->get_voyage();
+    values[5] = store->get_odm();
 
     for (size_t a = 0; a < BILLETIQUE_COLLS_LENGTH; a++)
     {
+        fl_font(FL_HELVETICA, 24);
         fl_text_extents(BILLETIQUE_COLLS[a], dx, dy, W1, H);
         fl_text_extents(values[a], dx, dy, W2, H);
         if (W2 > W1)

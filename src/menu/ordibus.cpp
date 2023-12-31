@@ -4,6 +4,7 @@
 
 #include "ordibus.hpp"
 #include "../layout.hpp"
+#include "../store.hpp"
 
 #include <FL/Fl.H>
 #include <FL/Fl_Group.H>
@@ -31,16 +32,31 @@ static void touch_button(Fl_Widget *widget, void *data)
     }
     else if (button_number == 10)
     {
+        ordibus->init_route();
         return;
     }
 
     ordibus->add_number(button_number);
 }
 
+void Ordibus::init_route()
+{
+    char *id = get_route_id();
+    TripData *trip = store->get_request_manager()->get_trip(id);
+    free((void *)id);
+
+    route_id.clear();
+
+    if (trip)
+        store->set_trip(trip);
+
+    damage(0x90);
+}
+
 // could have (and should have) extended the class to implement the keyboard
 // for any fl_group
-Ordibus::Ordibus(int x, int y, int w, int h, const char *l)
-    : Fl_Group(x, y, w, h, l)
+Ordibus::Ordibus(int x, int y, int w, int h, Store *store, const char *l)
+    : Fl_Group(x, y, w, h, l), store(store)
 {
     begin();
     Fl_Group *menu = new Fl_Group(0, 2 * TABS_HEIGHT, WIDTH, HEIGHT - 2 * TABS_HEIGHT);
@@ -101,13 +117,15 @@ void Ordibus::add_number(int id)
 char *Ordibus::get_route_id() const
 {
     char *buffer = (char *)malloc(sizeof(char) * (route_id.size() + 1));
+    if (!buffer)
+        throw std::bad_alloc();
+
     int i = 0;
     for (int num : route_id)
     {
         buffer[i++] = '0' + static_cast<char>(num);
     }
     buffer[i] = '\0';
-
     return buffer;
 }
 

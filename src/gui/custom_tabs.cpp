@@ -46,6 +46,8 @@ TECTabs::TECTabs(int x, int y, int w, int h, Store *store, const char *l)
     : TECGroup(x, y, w, h, l), active_tab(3), store(store)
 {
     active_box = (Fl_Box **)malloc(sizeof(Fl_Box) * TABS_AMMOUNT);
+    if (!active_box)
+        throw std::bad_alloc();
     begin();
     int offset = 0;
     for (int i = 0; i < TABS_AMMOUNT; ++i)
@@ -65,7 +67,7 @@ TECTabs::TECTabs(int x, int y, int w, int h, Store *store, const char *l)
         size_t *data = new size_t;
         *data = i;
         btn->user_data(data);
-        if(i==4)
+        if (i == 4)
             btn->deactivate();
         btn->callback(change_tab_cb, data); // pass twice the address to free later
     }
@@ -80,7 +82,7 @@ TECTabs::TECTabs(int x, int y, int w, int h, Store *store, const char *l)
     billetique->hide();
     active_box[1] = (Fl_Box *)billetique;
 
-    Ordibus *ordibus = new Ordibus(0, 2 * TABS_HEIGHT, WIDTH, HEIGHT - 2 * TABS_HEIGHT);
+    Ordibus *ordibus = new Ordibus(0, 2 * TABS_HEIGHT, WIDTH, HEIGHT - 2 * TABS_HEIGHT, store);
     ordibus->hide();
     active_box[2] = (Fl_Box *)ordibus;
 
@@ -92,6 +94,7 @@ TECTabs::TECTabs(int x, int y, int w, int h, Store *store, const char *l)
     maintenance->hide();
     active_box[4] = (Fl_Box *)maintenance;
 
+    store->set_active_widget(active_box[active_tab]);
     active_box[active_tab]->show();
 }
 

@@ -2,24 +2,23 @@
 #define AFFICHEUR_DATA
 #include <cstring>
 #include <cstdlib>
+#include <string>
 class AfficheurData
 {
 public:
-    AfficheurData(const char *id, const char *text, const char *line);
+    AfficheurData(std::string id, std::string text, std::string line);
     AfficheurData(AfficheurData *aff);
     ~AfficheurData();
 
-
-
-    const char *get_id() const;
-    const char *get_text() const;
-    const char *get_line() const;
-    const char *get_formatter() const;
+    std::string get_id() const;
+    std::string get_text() const;
+    std::string get_line() const;
+    char *get_formatter() const;
 
 private:
-    char *id;
-    char *text;
-    char *line;
+    std::string id;
+    std::string text;
+    std::string line;
 };
 
 #endif
