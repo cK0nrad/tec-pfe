@@ -254,18 +254,11 @@ void Billetique::draw()
     fl_font(FL_BOLD, 14);
     int dx, dy, W1, W2, H;
 
-    const char **values = (const char **)malloc(sizeof(char *) * 6);
+    std::string *values = new std::string[6];
     if (!values)
         throw std::bad_alloc();
 
-    if (store->is_line_active())
-    {
-        values[0] = store->get_current_trip()->get_trip_id().c_str();
-    }
-    else
-    {
-        values[0] = "/";
-    }
+    values[0] = store->is_line_active() ? store->get_current_trip()->get_trip_id().c_str() : std::string("/");
     values[1] = store->get_dir();
     values[2] = store->get_region();
     values[3] = store->get_zone();
@@ -276,7 +269,7 @@ void Billetique::draw()
     {
         fl_font(FL_HELVETICA, 24);
         fl_text_extents(BILLETIQUE_COLLS[a], dx, dy, W1, H);
-        fl_text_extents(values[a], dx, dy, W2, H);
+        fl_text_extents(values[a].c_str(), dx, dy, W2, H);
         if (W2 > W1)
             W1 = W2;
 
@@ -284,9 +277,9 @@ void Billetique::draw()
 
         fl_color(FL_WHITE);
         fl_draw(BILLETIQUE_COLLS[a], offset_x, 2 * TABS_HEIGHT, W1, TABS_HEIGHT, FL_ALIGN_LEFT);
-        fl_draw(values[a], offset_x, 3 * TABS_HEIGHT, W1, TABS_HEIGHT, FL_ALIGN_LEFT);
+        fl_draw(values[a].c_str(), offset_x, 3 * TABS_HEIGHT, W1, TABS_HEIGHT, FL_ALIGN_LEFT);
         offset_x += W1;
     }
 
-    free(values);
+    delete[] values;
 }

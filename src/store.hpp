@@ -29,27 +29,33 @@ public:
 
     void push_girouette(AfficheurData *girouette);
     void replace_girouette(AfficheurData *girouette);
+    void pop_afficheur_id(size_t idx);
     void change_girouette(size_t idx);
     void set_next_stop(std::string stop, std::string time);
 
     void set_trip(TripData *trip);
     void set_delay(std::string delay);
 
+    void set_original_girouette(AfficheurData *girouette);
+    void reset_girouette();
+
+    void stop_service();
+    
     // Getters
     const GpsState *get_gps_state() const;
     bool is_line_active() const;
 
     const TripData *get_current_trip() const;
 
-    const char *get_current_line() const;
-    const char *get_dir() const;
-    const char *get_region() const;
-    const char *get_zone() const;
-    const char *get_voyage() const;
-    const char *get_odm() const;
+    std::string get_current_line() const;
+    std::string get_dir() const;
+    std::string get_region() const;
+    std::string get_zone() const;
+    std::string get_voyage() const;
+    std::string get_odm() const;
 
-    const char *get_next_stop() const;
-    const char *get_next_stop_time() const;
+    std::string get_next_stop() const;
+    std::string get_next_stop_time() const;
 
     const AfficheurData *get_current_girouette() const;
     const std::list<AfficheurData *> *get_girouettes() const;
@@ -78,8 +84,11 @@ private:
     std::string zone;
     std::string voyage; // trip_id
     std::string odm;    // ordre de marche ? unknown for now
+
     std::list<AfficheurData *> *afficheurs;
     AfficheurData *current_girouette;
+    AfficheurData *original_girouette;
+
     // tiny hack to refresh the gui has the store is updated
     // idk if there is a better way to do this (wraping into
     // a widget linked to the store each sub-module?)

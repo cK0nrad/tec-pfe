@@ -8,7 +8,7 @@ SOURCES := $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.cpp))
 SOURCESH := $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.hpp))
 OBJECTS := $(SOURCES:.cpp=.o)
 
-TARGETS=sqlite3.o oss gps_emiter
+TARGETS=oss gps_emiter
 
 LIBS=`fltk-config --cxxflags --ldflags  --use-images --use-gl`
 
@@ -25,7 +25,9 @@ oss: $(OBJECTS)
 gps_emiter: src-gps_emiter/main.cpp
 	$(CXX) $(CFLAGS) src-gps_emiter/main.cpp -o gps_emiter -pthread 
 
-all : $(TARGETS)
+all : 
+	$(MAKE) sqlite3.o 
+	$(MAKE) $(TARGETS)
 
 clean:
 	rm -f $(OBJECTS) $(TARGETS)

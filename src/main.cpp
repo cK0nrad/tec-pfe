@@ -16,12 +16,8 @@
 int main()
 {
     Store *store = new Store();
-    if (!store)
-    {
-        return 1;
-    }
 
-    // // Start GPS tshread
+    // Start GPS tshread
     GPS *gps_receiver = new GPS(store);
     gps_receiver->start();
 
@@ -45,15 +41,12 @@ int main()
     window->show();
     int err_code = Fl::run();
 
-    // Stop GPS thread
-    gps_receiver->stop();
-    girouette->stop();
-    
-    Fl::delete_widget(window);
-    // Fl::delete_widget(custom_tabs);
-    // Fl::delete_widget(clock);
+    // Stop GPS & girouette thread
     delete gps_receiver;
     delete girouette;
+
+    delete window;
+
     delete store;
     return err_code;
 }

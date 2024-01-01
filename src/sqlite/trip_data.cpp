@@ -3,20 +3,47 @@
 #include <iostream>
 #include <iomanip>
 
+double earth_distance(double lat1, double lon1, double lat2, double lon2)
+{
+    static const double R = 6378.137;
+
+    double phi1 = lat1 * M_PI / 180;
+    double phi2 = lat2 * M_PI / 180;
+    double dLat = phi2 - phi1;
+    double dLon = (lon2 - lon1) * M_PI / 180;
+
+    double a = sin(dLat / 2) * sin(dLat / 2) +
+               cos(phi1) * cos(phi2) *
+                   sin(dLon / 2) * sin(dLon / 2);
+
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    double d = R * c;
+    return d;
+}
+
+double sqr_distance(double lat1, double lon1, double lat2, double lon2)
+{
+    double dLat = (lat2 - lat1);
+    double dLon = (lon2 - lon1);
+    return dLat * dLat + dLon * dLon;
+}
+
 TripData::TripData(
     std::string trip_id,
     std::string route_id,
+    std::string afficheur_id,
     std::string route_short_name,
     std::string route_long_name,
     std::vector<Point *> *shape,
     std::vector<StopTime *> *stops_times) : trip_id(trip_id),
                                             route_id(route_id),
+                                            afficheur_id(afficheur_id),
                                             route_short_name(route_short_name),
                                             route_long_name(route_long_name),
                                             shape(shape),
                                             stop_times(stops_times)
 {
-    cache_stop_distances = std::vector<double>(stops_times->size() - 1, 0.0);
+    cache_stop_distances = std::vector<double>(stops_times->size(), 0.0);
     cache_nearest_stop.reserve(stops_times->size());
     cache_nearest_shape.reserve(shape->size());
 
@@ -86,20 +113,6 @@ TripData::TripData(
         {
             stop_index++;
         }
-    }
-    for (auto t : cache_nearest_stop)
-    {
-        printf("%zu\n", t);
-    }
-
-        for (auto t : cache_nearest_shape)
-    {
-        printf("%zu\n", t);
-    }
-
-    for (size_t i = 0; i < cache_stop_distances.size(); i++)
-    {
-        printf("stop %zu: %f\n", i, cache_stop_distances[i]);
     }
 }
 
@@ -189,7 +202,12 @@ const std::vector<Point *> *TripData::get_shape() const
     return shape;
 }
 
-const std::string &TripData::get_trip_id() const
+std::string TripData::get_trip_id() const
 {
     return trip_id;
+}
+
+std::string TripData::get_afficheur_id() const
+{
+    return afficheur_id;
 }

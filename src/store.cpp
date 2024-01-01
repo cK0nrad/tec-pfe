@@ -16,14 +16,15 @@ This could be splitted into multiple files to improve readability
 
 Store::Store() : gps_state(new GpsState(0, 0, GPSStatus::STARTING)),
                  line_active(false),
+                 current_trip(nullptr),
                  next_stop(std::string("HORS SERVICE")),
                  next_stop_time(std::string("/")),
-                 current_line(std::string("3820213123123")),
+                 current_line(std::string("/")),
                  dir(std::string("R")),
                  region(std::string("045")),
                  zone(std::string("01")),
                  voyage(std::string("0028")),
-                 odm(std::string("0412")),
+                 odm(std::string("143066")),
                  active_widget(nullptr),
                  has_active(false),
                  line_indicator(nullptr),
@@ -35,13 +36,68 @@ Store::Store() : gps_state(new GpsState(0, 0, GPSStatus::STARTING)),
 
     afficheurs = new std::list<AfficheurData *>();
     current_girouette = new AfficheurData(id, text, line);
+    original_girouette = new AfficheurData(id, text, line); // Keep two different pointers to avoid freeing the original girouette
     afficheurs->push_back(current_girouette);
 
     request_manager = new RequstManager();
     request_manager->open();
-    //
-    // set_trip(request_manager->get_trip("6191"));
-    set_trip(request_manager->get_trip("6229"));
+}
+
+void Store::pop_afficheur_id(size_t idx)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex);
+    if(idx >= afficheurs->size())
+        return;
+    
+    if(afficheurs->size() == 1)
+        return;
+
+    auto it = afficheurs->begin();
+    std::advance(it, idx);
+    delete *it;
+    afficheurs->erase(it);
+    refresh_gui();
+}
+
+void Store::stop_service()
+{
+    std::unique_lock<std::shared_mutex> lock(mutex);
+    line_active = false;
+    delete current_trip;
+    current_trip = nullptr;
+
+    std::string id("01");
+    std::string text("HORS SERVICE");
+    std::string line("");
+    for (auto it = afficheurs->begin(); it != afficheurs->end(); ++it)
+        delete *it;
+    afficheurs->clear();
+
+    current_girouette = new AfficheurData(id, text, line);
+    original_girouette = new AfficheurData(id, text, line);
+    afficheurs->push_back(current_girouette);
+    refresh_gui();
+}
+
+void Store::reset_girouette()
+{
+    std::unique_lock<std::shared_mutex> lock(mutex);
+    for (auto it = afficheurs->begin(); it != afficheurs->end(); ++it)
+        delete *it;
+    afficheurs->clear();
+
+    AfficheurData *new_afficheur = new AfficheurData(original_girouette);
+    current_girouette = new_afficheur;
+
+    afficheurs->push_back(new_afficheur);
+    refresh_gui();
+}
+
+void Store::set_original_girouette(AfficheurData *girouette)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex);
+    original_girouette = new AfficheurData(girouette);
+    refresh_gui();
 }
 
 void Store::set_next_stop(std::string stop, std::string time)
@@ -92,7 +148,8 @@ void Store::set_line_indicator(Fl_Widget *widget)
 
 void Store::refresh_gui()
 {
-    if (has_active)
+    if (has_active && active_widget != nullptr)
+
         active_widget->redraw();
 }
 
@@ -149,13 +206,13 @@ void Store::push_girouette(AfficheurData *girouette)
 void Store::replace_girouette(AfficheurData *girouette)
 {
     std::unique_lock<std::shared_mutex> lock(mutex);
-    AfficheurData *new_afficheur = new AfficheurData(girouette);
-
     for (auto it = afficheurs->begin(); it != afficheurs->end(); ++it)
         delete *it;
     afficheurs->clear();
 
+    AfficheurData *new_afficheur = new AfficheurData(girouette);
     current_girouette = new_afficheur;
+
     afficheurs->push_back(new_afficheur);
     refresh_gui();
 }
@@ -174,74 +231,78 @@ bool Store::is_line_active() const
     return line_active;
 }
 
-// The pointer should not be freed
+// this is not thread safe (but doesn't really matter here since only T1 access it)
+//  The pointer should not be freed
 const GpsState *Store::get_gps_state() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
     return gps_state;
 }
 
-const char *Store::get_current_line() const
+// this is not thread safe (but doesn't really matter here since only T1 access it)
+std::string Store::get_current_line() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
     return current_line.c_str();
 }
 
-const char *Store::get_dir() const
+std::string Store::get_dir() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
     return dir.c_str();
 }
 
-const char *Store::get_region() const
+std::string Store::get_region() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
     return region.c_str();
 }
 
-const char *Store::get_zone() const
+std::string Store::get_zone() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
     return zone.c_str();
 }
 
-const char *Store::get_voyage() const
+std::string Store::get_voyage() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
     return voyage.c_str();
 }
 
-const char *Store::get_odm() const
+std::string Store::get_odm() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
     return odm.c_str();
 }
 
+// this is not thread safe (but doesn't really matter here since only T1 access it)
 const AfficheurData *Store::get_current_girouette() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
     return current_girouette;
 }
-
+// this is not thread safe (but doesn't really matter here since only T1 access it)
 const std::list<AfficheurData *> *Store::get_girouettes() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
     return afficheurs;
 }
 
+// this is not thread safe (but doesn't really matter here since only T1 access it)
 const TripData *Store::get_current_trip() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
     return current_trip;
 }
 
-const char *Store::get_next_stop() const
+std::string Store::get_next_stop() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
     return next_stop.c_str();
 }
 
-const char *Store::get_next_stop_time() const
+std::string Store::get_next_stop_time() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
     return next_stop_time.c_str();
@@ -268,7 +329,6 @@ std::string Store::get_delay() const
     return delay;
 }
 
-
 // RM has it's own thread safety
 RequstManager *Store::get_request_manager()
 {
@@ -284,7 +344,6 @@ Store::~Store()
         delete current_trip;
 
     delete afficheurs;
-    delete current_girouette;
     delete request_manager;
     delete gps_state;
 }

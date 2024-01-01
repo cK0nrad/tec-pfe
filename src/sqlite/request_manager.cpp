@@ -85,7 +85,7 @@ std::list<AfficheurData *> *RequstManager::get_afficheur(const char *like_name)
         }
         else
         {
-            const char *line_raw = (const char *)(sqlite3_column_text(stmt, 1));
+            const char *line_raw = (const char *)(sqlite3_column_text(stmt, 2));
             line = std::string(line_raw);
         }
 
@@ -111,7 +111,7 @@ TripData *RequstManager::get_trip(const char *s_trip_id)
 
     char sql[256];
     // avoid * since it can (unlikely) change order
-    sprintf(sql, "SELECT trip_id, route_id, shape_id, route_short_name, route_long_name FROM(SELECT trips.*, routes.* FROM trips JOIN routes ON routes.route_id = trips.route_id WHERE trip_id = \"%s\" LIMIT 1);", s_trip_id);
+    sprintf(sql, "SELECT trip_id, route_id, shape_id, afficheur_id, route_short_name, route_long_name FROM(SELECT trips.*, routes.* FROM trips JOIN routes ON routes.route_id = trips.route_id WHERE trip_id = \"%s\" LIMIT 1);", s_trip_id);
 
     sqlite3_stmt *stmt;
     rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
@@ -132,12 +132,14 @@ TripData *RequstManager::get_trip(const char *s_trip_id)
     const char *raw_trip_id = (const char *)sqlite3_column_text(stmt, 0);
     const char *raw_route_id = (const char *)sqlite3_column_text(stmt, 1);
     const char *raw_shape_id = (const char *)sqlite3_column_text(stmt, 2);
-    const char *raw_route_short_name = (const char *)sqlite3_column_text(stmt, 3);
-    const char *raw_route_long_name = (const char *)sqlite3_column_text(stmt, 4);
+    const char *raw_afficheur_id = (const char *)sqlite3_column_text(stmt, 3);
+    const char *raw_route_short_name = (const char *)sqlite3_column_text(stmt, 4);
+    const char *raw_route_long_name = (const char *)sqlite3_column_text(stmt, 5);
 
     std::string trip_id(raw_trip_id);
     std::string route_id(raw_route_id);
     std::string shape_id(raw_shape_id);
+    std::string afficheur_id(raw_afficheur_id);
     std::string route_short_name(raw_route_short_name);
     std::string route_long_name(raw_route_long_name);
 
@@ -147,6 +149,7 @@ TripData *RequstManager::get_trip(const char *s_trip_id)
     TripData *trip_data = new TripData(
         trip_id,
         route_id,
+        afficheur_id,
         route_short_name,
         route_long_name,
         shape,

@@ -63,21 +63,27 @@ class Afficheurs : public Fl_Group
 public:
     Afficheurs(int x, int y, int w, int h, Store *store, const char *l = nullptr);
     ~Afficheurs();
-
-    // copy from ordibus should be wrapped in own class to prevent WET code
-    void add_number(int id);
-    char *get_afficheur_id() const;
-    void pop_afficheur_id();
-    //
-    void find_afficheur();
-    void free_popup();
-    void change_active(size_t idx);
     void draw();
+    void pop_afficheur_id();
+    void list_afficheurs();
+    void reset_girouette();
+    void add_number(int id);
+    void free_popup();
+    void find_afficheur();
+    void change_active(size_t idx);
     void push_afficheur();
     void replace_afficheur();
-
+    void delete_afficheur();
+    // copy from ordibus should be wrapped in own class to prevent WET code
 private:
-    // popup
+    char *get_afficheur_id() const;
+    void free_search_popup();
+    void free_list_popup();
+    // popup (list afficheurs)
+    bool popup_list;
+    Fl_Button *delete_btn;
+
+    // popup (search)
     bool popup;
     std::list<AfficheurData *> *afficheurs;
     std::list<DragButton *> *afficheur_btn;

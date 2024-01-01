@@ -9,8 +9,10 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Group.H>
 #include <FL/fl_draw.H>
+#include <FL/Fl_BMP_Image.H>
 #include <list>
 #include <charconv>
+
 #define BUTTON_WIDTH 80
 #define BUTTON_FONT_SIZE 50
 #define ORDIBUS_SIZE_LIMIT 15
@@ -19,6 +21,12 @@
 
 static const int ORDIBUS_KEYPADS[12] = {7, 4, 1, 10, 8, 5, 2, 0, 9, 6, 3, 11};
 static const char *ORDIBUS_KEYPADS_LABEL[12] = {"7", "4", "1", "V", "8", "5", "2", "0", "9", "6", "3", "←"};
+
+static void stop_service_cb(Fl_Widget *widget, void *)
+{
+    Ordibus *ob = (Ordibus *)widget->parent();
+    ob->reset_service();
+}
 
 static void touch_button(Fl_Widget *widget, void *data)
 {
@@ -39,6 +47,27 @@ static void touch_button(Fl_Widget *widget, void *data)
     ordibus->add_number(button_number);
 }
 
+static void error_timeout(void *data)
+{
+    Ordibus *ordibus = (Ordibus *)data;
+    ordibus->set_error();
+}
+
+void Ordibus::reset_service()
+{
+    route_id.clear();
+    error = false;
+    damage(0x90);
+    store->stop_service();
+}
+
+void Ordibus::set_error()
+{
+    error = false;
+    Fl::remove_timeout(error_timeout, this);
+    damage(0x90);
+}
+
 void Ordibus::init_route()
 {
     char *id = get_route_id();
@@ -48,7 +77,35 @@ void Ordibus::init_route()
     route_id.clear();
 
     if (trip)
+    {
+        const std::string afficheur = trip->get_afficheur_id();
+        std::list<AfficheurData *> *results = store->get_request_manager()->get_afficheur(afficheur.c_str());
+
+        if (results->size() == 0)
+        {
+            error = true;
+            Fl::remove_timeout(error_timeout, this);
+            Fl::add_timeout(3, error_timeout, this);
+            return;
+        }
+
+        AfficheurData *afficheur_data = results->front();
+        printf("Afficheur %s\n", afficheur_data->get_id().c_str());
+
         store->set_trip(trip);
+        store->replace_girouette(afficheur_data);
+        store->set_original_girouette(afficheur_data);
+
+        for (auto a : *results)
+            delete a;
+        delete results;
+    }
+    else
+    {
+        error = true;
+        Fl::remove_timeout(error_timeout, this);
+        Fl::add_timeout(3, error_timeout, this);
+    }
 
     damage(0x90);
 }
@@ -56,7 +113,7 @@ void Ordibus::init_route()
 // could have (and should have) extended the class to implement the keyboard
 // for any fl_group
 Ordibus::Ordibus(int x, int y, int w, int h, Store *store, const char *l)
-    : Fl_Group(x, y, w, h, l), store(store)
+    : Fl_Group(x, y, w, h, l), store(store), error(false)
 {
     begin();
     Fl_Group *menu = new Fl_Group(0, 2 * TABS_HEIGHT, WIDTH, HEIGHT - 2 * TABS_HEIGHT);
@@ -98,11 +155,24 @@ Ordibus::Ordibus(int x, int y, int w, int h, Store *store, const char *l)
         offset_x += BUTTON_WIDTH + 1;
     }
 
+    Fl_Image *stop_img = new Fl_BMP_Image("./src/assets/stop.bmp");
+    button = new Fl_Button(offset_x, offset_y - BUTTON_WIDTH, BUTTON_WIDTH, BUTTON_WIDTH, "");
+    button->align(FL_ALIGN_IMAGE_BACKDROP | FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
+    button->image(stop_img);
+    button->callback(stop_service_cb, nullptr);
+    buttons.push_back(button);
+
     end();
 }
 
 void Ordibus::add_number(int id)
 {
+    if (error)
+    {
+        error = false;
+        damage(0x90);
+    }
+
     if (route_id.size() >= ORDIBUS_SIZE_LIMIT)
         return;
 
@@ -158,6 +228,13 @@ void Ordibus::draw()
     char *id = get_route_id();
     fl_draw(id, CENTER_OFFSET, (int)(2.5 * TABS_HEIGHT), 3 * BUTTON_WIDTH, TABS_HEIGHT, FL_ALIGN_CENTER);
     free((void *)id);
+
+    if (error)
+    {
+        fl_color(FL_RED);
+        fl_draw("Invalid trip ID", CENTER_OFFSET, (int)(2.5 * TABS_HEIGHT), 3 * BUTTON_WIDTH, TABS_HEIGHT, FL_ALIGN_CENTER);
+        return;
+    }
 }
 
 Ordibus::~Ordibus()

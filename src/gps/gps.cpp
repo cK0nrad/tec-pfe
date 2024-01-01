@@ -10,7 +10,7 @@
 #include <ctime>
 #include <math.h>
 
-#define WAIT_AFTER_ERROR 5 //[s]
+#define WAIT_AFTER_ERROR 1 //[s]
 #define CLOCK_TEXT_LENGTH 7
 
 GPS::GPS(Store *store) : store(store), stop_flag(0), tc(0)
@@ -36,6 +36,34 @@ void GPS::main_loop()
         run();
         tc -= 1;
         store->set_gps_status(GPSStatus::ERROR);
+
+        // If there's an error, rely on the theorical data
+        // and offset as the driver decide
+        const TripData *trip_data = store->get_current_trip();
+        if (trip_data == nullptr)
+        {
+            std::this_thread::sleep_for(std::chrono::seconds(WAIT_AFTER_ERROR));
+            continue;
+        }
+
+        const StopTime *next_stop = trip_data->get_theorical_stop();
+        if (next_stop == nullptr)
+        {
+            std::this_thread::sleep_for(std::chrono::seconds(WAIT_AFTER_ERROR));
+            continue;
+        }
+
+        char *buffer = (char *)malloc(CLOCK_TEXT_LENGTH * sizeof(char));
+        if (!buffer)
+            throw std::bad_alloc();
+
+        time_t st = next_stop->arrival_time;
+        struct tm *rt_next_stop_time = std::gmtime(&st);
+        std::strftime(buffer, CLOCK_TEXT_LENGTH, "%H:%M", rt_next_stop_time);
+        store->set_next_stop(next_stop->stop_name, std::string(buffer));
+        free(buffer);
+        store->set_delay(std::string("?"));
+
         std::this_thread::sleep_for(std::chrono::seconds(WAIT_AFTER_ERROR));
     }
 }
@@ -126,6 +154,9 @@ void GPS::run()
             const std::vector<size_t> *cache_nearest_stop = trip_data->get_cache_nearest_stop();
             const std::vector<double> *cache_distance = trip_data->get_cache_stop_distances();
             const std::vector<StopTime *> *stop_times = trip_data->get_stop_times();
+
+            if (!cache_nearest_shape || !cache_nearest_stop || !cache_distance || !stop_times)
+                continue;
 
             // Here we are doing a nearest point search
             //  which is also done when we get the next stop
@@ -241,7 +272,6 @@ void GPS::run()
                 int scheduled_delay = th->arrival_time - next_stop->arrival_time;
                 double total_delay = virtual_delay + scheduled_delay;
                 time_t total_delay_int = (int)total_delay;
-                printf("Total delay: %ld\n", total_delay_int);
 
                 char *buffer = (char *)malloc(CLOCK_TEXT_LENGTH * sizeof(char));
                 if (!buffer)
@@ -295,7 +325,6 @@ void GPS::run()
                 // 2.6 Get virtual delay
                 double virtual_delay = virtual_distance / avg + absolute_delay;
                 time_t virtual_delay_int = (int)virtual_delay;
-                printf("Total delay: %ld\n", virtual_delay);
 
                 char *buffer = (char *)malloc(CLOCK_TEXT_LENGTH * sizeof(char));
                 if (!buffer)
@@ -372,7 +401,6 @@ void GPS::run()
 
                 double total_delay = virtual_delay + scheduled_delay;
                 time_t total_delay_int = (int)total_delay;
-                printf("Total delay: %ld\n", total_delay_int);
 
                 char *buffer = (char *)malloc(CLOCK_TEXT_LENGTH * sizeof(char));
                 if (!buffer)

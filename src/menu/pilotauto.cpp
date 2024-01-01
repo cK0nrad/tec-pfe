@@ -14,13 +14,6 @@ const char *errored = "ERREUR GPS";
 const char *starting = "DEMARAGE";
 const char *unknown = "UNKNOWN";
 
-struct LineState_t
-{
-    char *line;
-    char *odm;
-    int current_stop;
-} typedef LineState;
-
 Pilotauto::Pilotauto(int x, int y, int w, int h, Store *store, const char *l)
     : Fl_Group(x, y, w, h, l), store(store)
 {
@@ -29,25 +22,12 @@ Pilotauto::Pilotauto(int x, int y, int w, int h, Store *store, const char *l)
     menu->box(FL_FLAT_BOX);
     menu->color(SECONDARY);
     menu->end();
-
-    LineState *line = (LineState *)malloc(sizeof(LineState));
-    if (!line)
-        throw std::bad_alloc();
-    line->line = (char *)"2";
-    line->odm = (char *)"143066";
-    line->current_stop = 0;
-
-    user_data((void *)line);
-
     end();
 }
 
 void Pilotauto::draw()
 {
     Fl_Group::draw();
-    LineState *line = (LineState *)user_data();
-    if (!line)
-        return;
 
     size_t current_x = 15;
     size_t bottom = h() + y();
@@ -75,7 +55,7 @@ void Pilotauto::draw()
     fl_font(FL_HELVETICA, 20);
 
     fl_draw("ODM", 15, 3 * TABS_HEIGHT);
-    fl_draw(line->odm, 15, 3 * TABS_HEIGHT + MARGIN, 100, TABS_HEIGHT, FL_ALIGN_CENTER);
+    fl_draw(store->get_odm().c_str(), 15, 3 * TABS_HEIGHT + MARGIN, 100, TABS_HEIGHT, FL_ALIGN_CENTER);
     current_x += 100 + MARGIN;
 
     fl_draw("Etat", current_x, 3 * TABS_HEIGHT);
@@ -97,12 +77,16 @@ void Pilotauto::draw()
         status_text = unknown;
         break;
     }
+
     fl_draw(status_text, current_x, 3 * TABS_HEIGHT + MARGIN, 350, TABS_HEIGHT, FL_ALIGN_CENTER);
     current_x += 350 + MARGIN;
 
     fl_draw("Retard", current_x, 3 * TABS_HEIGHT);
 
-    fl_draw(store->get_delay().c_str(), current_x, 3 * TABS_HEIGHT + MARGIN, 100, TABS_HEIGHT, FL_ALIGN_CENTER);
+    if (store->is_line_active())
+    {
+        fl_draw(store->get_delay().c_str(), current_x, 3 * TABS_HEIGHT + MARGIN, 100, TABS_HEIGHT, FL_ALIGN_CENTER);
+    }
 
     fl_draw("Afficheurs extérieurs", 15, 5 * TABS_HEIGHT);
 
@@ -111,6 +95,9 @@ void Pilotauto::draw()
     free((void *)formatted);
 
     fl_draw("Arret suivant", 15, bottom - 2 * TABS_HEIGHT);
-    fl_draw(store->get_next_stop(), 15 + 75 + MARGIN, bottom - 2 * TABS_HEIGHT + MARGIN, 480, TABS_HEIGHT, FL_ALIGN_CENTER);
-    fl_draw(store->get_next_stop_time(), 15, bottom - 2 * TABS_HEIGHT + MARGIN, 75, TABS_HEIGHT, FL_ALIGN_CENTER);
+    if (store->is_line_active())
+    {
+        fl_draw(store->get_next_stop().c_str(), 15 + 75 + MARGIN, bottom - 2 * TABS_HEIGHT + MARGIN, 480, TABS_HEIGHT, FL_ALIGN_CENTER);
+        fl_draw(store->get_next_stop_time().c_str(), 15, bottom - 2 * TABS_HEIGHT + MARGIN, 75, TABS_HEIGHT, FL_ALIGN_CENTER);
+    }
 }

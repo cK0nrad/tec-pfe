@@ -11,6 +11,9 @@ Compatible with RaspPI 4
 
 This repository has been published in the absence of any discovered patents or copyright records for terms including "letec pfe," "otw pfe," "srwt pfe," "letec sae," among others in various combinations. Should there exist a patent or any other form of intellectual property that this repository infringes upon, please reach out to me. Upon verification, I will promptly remove the repository.
 
+## Hierarchy
+
+This is most likely spaghetti code, but it works. It wasn't mean to be really maintainable but most of the codebase can be splitted into serval submodule without difficulties.
 
 ## Requirements
 
@@ -26,6 +29,10 @@ This repository has been published in the absence of any discovered patents or c
 > $ ./its
 > 
 > $ ./gps_emiter
+
+## DB
+
+The database is not a perfect GTFS replica, but it do work the same way.
 
 ## Skills
 
@@ -52,9 +59,3 @@ It was just a POC, so I did it in few nights (~30h with 6h-8h of fltk doc readin
 
 - TEC employees on TikTok for the UI
 - cKonrad (aka. me)
-
-
-
- //When emulating, the bus is always on time or always constantly
-            // late or early
-            // Thus whatever the average speed, it'll never change the actual delay

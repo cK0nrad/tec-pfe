@@ -121,11 +121,13 @@ void TECTabs::draw()
 
 TECTabs::~TECTabs()
 {
-
     for (int i = 0; i < TABS_AMMOUNT; ++i)
     {
-        delete active_box[i];
+        if (active_box[i] != nullptr)
+        {
+            delete active_box[i];
+            active_box[i] = nullptr;
+        }
     }
-
     free(active_box);
 }

@@ -18,6 +18,12 @@ public:
         this->status = status;
     }
 
+    GpsState(GpsState *state) {
+        lat = state->lat;
+        lon = state->lon;
+        status = state->status;
+    }
+
     double get_lat() const
     {
         return lat;
