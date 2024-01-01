@@ -10,7 +10,6 @@ void error_log(const char *msg)
     std::cout << "[" << time << "] ";
     std::cout << "[ERROR] ";
     std::cout << msg << std::endl;
-    exit(0);
 }
 
 void info_log(const char *msg)
