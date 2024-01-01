@@ -43,7 +43,7 @@ void TECTabs::change_tab(int tab)
 }
 
 TECTabs::TECTabs(int x, int y, int w, int h, Store *store, const char *l)
-    : TECGroup(x, y, w, h, l), active_tab(3), store(store)
+    : TECGroup(x, y, w, h, l), active_tab(2), store(store)
 {
     active_box = (Fl_Box **)malloc(sizeof(Fl_Box) * TABS_AMMOUNT);
     if (!active_box)
