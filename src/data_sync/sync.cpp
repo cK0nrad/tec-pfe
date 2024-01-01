@@ -25,6 +25,7 @@ SyncClient::SyncClient(Store *store) : stop_flag(false), store(store), sock(0)
 SyncClient::~SyncClient()
 {
     stop();
+    info_log("Stopping Sync thread...");
     await();
 }
 

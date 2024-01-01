@@ -57,6 +57,8 @@ void Store::pop_afficheur_id(size_t idx)
     std::advance(it, idx);
     delete *it;
     afficheurs->erase(it);
+
+    current_girouette = *afficheurs->begin();
     refresh_gui();
 }
 
@@ -87,10 +89,8 @@ void Store::reset_girouette()
         delete *it;
     afficheurs->clear();
 
-    AfficheurData *new_afficheur = new AfficheurData(original_girouette);
-    current_girouette = new_afficheur;
-
-    afficheurs->push_back(new_afficheur);
+    current_girouette = new AfficheurData(original_girouette);
+    afficheurs->push_back(current_girouette);
     refresh_gui();
 }
 
@@ -275,11 +275,11 @@ std::string Store::get_odm() const
     return odm.c_str();
 }
 
-// this is not thread safe (but doesn't really matter here since only T1 access it)
 AfficheurData Store::get_current_girouette() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
-    return current_girouette;
+    printf("get_current_girouette\n");
+    return AfficheurData(current_girouette);
 }
 
 size_t Store::get_girouettes_size() const

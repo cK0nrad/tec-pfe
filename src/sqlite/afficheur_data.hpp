@@ -9,9 +9,9 @@ public:
     AfficheurData(std::string id, std::string text, std::string line);
     AfficheurData(AfficheurData *aff);
 
-    const std::string &get_id() const;
-    const std::string &get_text() const;
-    const std::string &get_line() const;
+    std::string get_id() const;
+    std::string get_text() const;
+    std::string get_line() const;
     char *get_formatter() const;
     char *get_line_formatter() const;
 

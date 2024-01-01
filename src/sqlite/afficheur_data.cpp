@@ -4,9 +4,9 @@ AfficheurData::AfficheurData(std::string id, std::string text, std::string line)
 
 AfficheurData::AfficheurData(AfficheurData *aff)
 {
-    id = std::string(aff->get_id().c_str());
-    text = std::string(aff->get_text().c_str());
-    line = std::string(aff->get_line().c_str());
+    id = aff->get_id();
+    text = aff->get_text();
+    line = aff->get_line();
 }
 
 char *AfficheurData::get_formatter() const
@@ -35,6 +35,6 @@ char *AfficheurData::get_line_formatter() const
     return formated;
 }
 
-const std::string &AfficheurData::get_id() const { return id; }
-const std::string &AfficheurData::get_text() const { return text; }
-const std::string &AfficheurData::get_line() const { return line; }
+std::string AfficheurData::get_id() const { return id; }
+std::string AfficheurData::get_text() const { return text; }
+std::string AfficheurData::get_line() const { return line; }

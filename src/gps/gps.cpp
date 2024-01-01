@@ -32,6 +32,7 @@ void GPS::start()
 GPS::~GPS()
 {
     stop();
+    info_log("Stopping GPS thread...");
     await();
 }
 
