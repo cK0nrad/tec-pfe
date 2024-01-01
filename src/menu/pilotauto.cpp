@@ -18,19 +18,19 @@ const char *errored = "ERREUR GPS";
 const char *starting = "DEMARAGE";
 const char *unknown = "UNKNOWN";
 
-static void next_cb(Fl_Widget *widget, void *data)
+static void next_cb(Fl_Widget *, void *data)
 {
     Store *store = (Store *)data;
     store->go_to_next_stop();
 }
 
-static void prev_cb(Fl_Widget *widget, void *data)
+static void prev_cb(Fl_Widget *, void *data)
 {
     Store *store = (Store *)data;
     store->go_to_prev_stop();
 }
 
-static void overwrite_cb(Fl_Widget *widget, void *data)
+static void overwrite_cb(Fl_Widget *, void *data)
 {
     Store *store = (Store *)data;
     store->stop_overwrite();
