@@ -43,6 +43,12 @@ public:
     void reset_girouette();
 
     void stop_service();
+    void stop_overwrite();
+    void go_to_next_stop();
+    void go_to_prev_stop();
+
+    void set_stop_index(size_t idx);
+    void refresh_delay();
 
     // Getters (no pointer to avoid cross access over threads)
     // less efficient but safer
@@ -68,9 +74,16 @@ public:
 
     // independant thread safety
     RequstManager *get_request_manager();
+    bool is_next_stop_overwrite() const;
+    size_t get_next_stop_idx() const;
+
+
 
 private:
+    void refresh_delay_unsecure();
     void refresh_gui();
+    void refresh_stop();
+
     RequstManager *request_manager;
     mutable std::shared_mutex mutex;
     GpsState *gps_state;
@@ -82,6 +95,9 @@ private:
 
     std::string next_stop;
     std::string next_stop_time;
+    bool next_stop_overwrite;
+    size_t next_stop_idx;
+
 
     std::string current_line;
     std::string dir;

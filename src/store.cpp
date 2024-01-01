@@ -14,12 +14,16 @@ This could be splitted into multiple files to improve readability
 #include "sqlite/request_manager.hpp"
 #include "sqlite/afficheur_data.hpp"
 #include "sqlite/trip_data.hpp"
+#include <ctime>
+#define CLOCK_TEXT_LENGTH 7
 
 Store::Store() : gps_state(new GpsState(0, 0, GPSStatus::STARTING)),
                  line_active(false),
                  current_trip(nullptr),
                  next_stop(std::string("HORS SERVICE")),
                  next_stop_time(std::string("/")),
+                 next_stop_overwrite(0),
+                 next_stop_idx(0),
                  current_line(std::string("/")),
                  dir(std::string("R")),
                  region(std::string("045")),
@@ -30,6 +34,7 @@ Store::Store() : gps_state(new GpsState(0, 0, GPSStatus::STARTING)),
                  has_active(false),
                  line_indicator(nullptr),
                  line_indicator_active(false)
+
 {
     std::string id("01");
     std::string text("HORS SERVICE");
@@ -47,10 +52,10 @@ Store::Store() : gps_state(new GpsState(0, 0, GPSStatus::STARTING)),
 void Store::pop_afficheur_id(size_t idx)
 {
     std::unique_lock<std::shared_mutex> lock(mutex);
-    if(idx >= afficheurs->size())
+    if (idx >= afficheurs->size())
         return;
-    
-    if(afficheurs->size() == 1)
+
+    if (afficheurs->size() == 1)
         return;
 
     auto it = afficheurs->begin();
@@ -150,7 +155,6 @@ void Store::set_line_indicator(Fl_Widget *widget)
 void Store::refresh_gui()
 {
     if (has_active && active_widget != nullptr)
-
         active_widget->redraw();
 }
 
@@ -287,7 +291,6 @@ size_t Store::get_girouettes_size() const
     return afficheurs->size();
 }
 
-
 std::list<AfficheurData *> *Store::get_girouettes() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
@@ -326,6 +329,7 @@ void Store::set_delay(std::string delay)
 void Store::set_trip(TripData *trip)
 {
     std::unique_lock<std::shared_mutex> lock(mutex);
+    free((void *)current_trip);
     current_trip = trip;
     line_active = true;
     refresh_gui();
@@ -335,6 +339,114 @@ std::string Store::get_delay() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
     return delay;
+}
+
+void Store::stop_overwrite()
+{
+    std::unique_lock<std::shared_mutex> lock(mutex);
+    next_stop_overwrite = false;
+    next_stop_idx = current_trip->get_theorical_stop()->idx;
+    refresh_stop();
+}
+
+void Store::refresh_stop()
+{
+    const StopTime *stop = current_trip->get_nth_stop(next_stop_idx);
+    refresh_delay_unsecure();
+    next_stop = stop->stop_name;
+    next_stop_time = get_arrival_time(stop);
+    refresh_gui();
+}
+
+void Store::go_to_next_stop()
+{
+    std::unique_lock<std::shared_mutex> lock(mutex);
+    if (!line_active)
+        return;
+
+    size_t max_size = current_trip->get_stop_times()->size() - 1;
+    if (next_stop_idx > max_size)
+        return;
+
+    next_stop_overwrite = true;
+    next_stop_idx++;
+    refresh_stop();
+}
+
+void Store::go_to_prev_stop()
+{
+    std::unique_lock<std::shared_mutex> lock(mutex);
+    if (!line_active)
+        return;
+
+    if (next_stop_idx == 0)
+        return;
+
+    next_stop_overwrite = true;
+    next_stop_idx--;
+    refresh_stop();
+}
+
+void Store::set_stop_index(size_t idx)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex);
+    size_t max_size = current_trip->get_stop_times()->size() - 1;
+    if (idx > max_size)
+        idx = max_size;
+    next_stop_idx = idx;
+    refresh_stop();
+}
+
+void Store::refresh_delay_unsecure()
+{
+    if (!line_active && !next_stop_overwrite)
+        return;
+
+    std::time_t rawtime = std::time(nullptr);
+    struct tm *timeinfo = std::localtime(&rawtime);
+    int current_time = timeinfo->tm_hour * 3600 + timeinfo->tm_min * 60 + timeinfo->tm_sec;
+    int scheduled_time = current_trip->get_nth_stop(next_stop_idx)->arrival_time;
+
+    char *buffer = (char *)malloc(CLOCK_TEXT_LENGTH * sizeof(char));
+    if (!buffer)
+        throw std::bad_alloc();
+
+    time_t total_delay = current_time - scheduled_time;
+
+    if (total_delay < 0)
+    {
+        total_delay = -total_delay;
+        struct tm *timeinfo = std::gmtime(&total_delay);
+        std::strftime(buffer, CLOCK_TEXT_LENGTH, "+%H:%M", timeinfo);
+    }
+    else
+    {
+        struct tm *timeinfo = std::gmtime(&total_delay);
+        std::strftime(buffer, CLOCK_TEXT_LENGTH, "-%H:%M", timeinfo);
+    }
+    delay = std::string(buffer);
+
+    free(buffer);
+
+    refresh_gui();
+}
+
+void Store::refresh_delay()
+{
+    std::unique_lock<std::shared_mutex> lock(mutex);
+    refresh_delay_unsecure();
+}
+
+bool Store::is_next_stop_overwrite() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex);
+    return next_stop_overwrite;
+}
+
+size_t Store::get_next_stop_idx() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex);
+    return next_stop_idx;
 }
 
 // RM has it's own thread safety

@@ -16,8 +16,7 @@ extern "C"
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
-
-
+#define CLOCK_TEXT_LENGTH 7
 
 RequstManager::RequstManager() : is_open(false), db(nullptr), errMsg(nullptr), rc(0)
 {
@@ -242,4 +241,17 @@ std::vector<Point *> *RequstManager::get_shape(const char *shape_id)
     }
     sqlite3_finalize(stmt);
     return shape_data;
+}
+
+std::string get_arrival_time(const StopTime *stop_time)
+{
+    char *buffer = (char *)malloc(CLOCK_TEXT_LENGTH * sizeof(char));
+    if (!buffer)
+        throw std::bad_alloc();
+    time_t st = stop_time->arrival_time;
+    struct tm *rt_next_stop_time = std::gmtime(&st);
+    std::strftime(buffer, CLOCK_TEXT_LENGTH, "%H:%M", rt_next_stop_time);
+    std::string arrival_time(buffer);
+    free(buffer);
+    return arrival_time;
 }

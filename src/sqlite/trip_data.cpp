@@ -320,3 +320,12 @@ std::string TripData::get_afficheur_id() const
 {
     return afficheur_id;
 }
+
+
+const StopTime *TripData::get_nth_stop(size_t idx) const
+{
+    if(idx >= stop_times->size())
+        idx = stop_times->size() - 1;
+
+    return stop_times->at(idx);
+}

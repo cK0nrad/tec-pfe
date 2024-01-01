@@ -99,6 +99,10 @@ private:
     Fl_Button **buttons;
     std::list<int> *afficheur_id;
     Store *store;
+
+
+    Fl_Image *loupe_img;
+    Fl_Image *info_img;
 };
 typedef struct PassingVal_T
 {

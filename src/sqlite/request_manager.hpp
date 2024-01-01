@@ -34,6 +34,9 @@ struct StopTime
     size_t idx;
 };
 
+std::string get_arrival_time(const StopTime *stop_time);
+
+
 class RequstManager
 {
 public:

@@ -43,11 +43,21 @@ void GPS::main_loop()
     {
         run();
         tc -= 1;
+        if (stop_flag)
+            break;
         store->set_gps_status(GPSStatus::ERROR);
 
         // If there's no trip, no need to continue
         if (!store->is_line_active())
         {
+            std::this_thread::sleep_for(std::chrono::seconds(WAIT_AFTER_ERROR));
+            continue;
+        }
+
+        // If there's a trip, check if the trip is overwritten
+        if (store->is_next_stop_overwrite())
+        {
+            store->refresh_delay();
             std::this_thread::sleep_for(std::chrono::seconds(WAIT_AFTER_ERROR));
             continue;
         }
@@ -60,17 +70,7 @@ void GPS::main_loop()
             continue;
         }
 
-        char *buffer = (char *)malloc(CLOCK_TEXT_LENGTH * sizeof(char));
-        if (!buffer)
-            throw std::bad_alloc();
-
-        time_t st = next_stop->arrival_time;
-        struct tm *rt_next_stop_time = std::gmtime(&st);
-        std::strftime(buffer, CLOCK_TEXT_LENGTH, "%H:%M", rt_next_stop_time);
-        store->set_next_stop(next_stop->stop_name, std::string(buffer));
-        free(buffer);
-        store->set_delay(std::string("?"));
-
+        store->set_stop_index(next_stop->idx);
         std::this_thread::sleep_for(std::chrono::seconds(WAIT_AFTER_ERROR));
     }
 }
@@ -88,7 +88,7 @@ void GPS::run()
 
     if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
     {
-        error_log("Socket creation error");
+        error_log("GPS: Socket creation error");
         store->set_gps_status(GPSStatus::ERROR);
         return;
     }
@@ -99,7 +99,7 @@ void GPS::run()
     // Connect to the server
     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
     {
-        error_log("Connection Failed");
+        error_log("GPS: Connection Failed");
         store->set_gps_status(GPSStatus::ERROR);
         return;
     }
@@ -113,7 +113,7 @@ void GPS::run()
         ssize_t read_size = read(sock, values, sizeof(values));
         if (read_size <= 0)
         {
-            error_log("Error reading from socket");
+            error_log("GPS: Error reading from socket");
             store->set_gps_status(GPSStatus::ERROR);
             break;
         }
@@ -161,12 +161,11 @@ void GPS::run()
             struct tm *timeinfo = std::localtime(&rawtime);
             int current_time = timeinfo->tm_hour * 3600 + timeinfo->tm_min * 60 + timeinfo->tm_sec;
 
-            const std::vector<size_t> *cache_nearest_shape = trip_data.get_cache_nearest_shape();
             const std::vector<size_t> *cache_nearest_stop = trip_data.get_cache_nearest_stop();
             const std::vector<double> *cache_distance = trip_data.get_cache_stop_distances();
             const std::vector<StopTime *> *stop_times = trip_data.get_stop_times();
 
-            if (!cache_nearest_shape || !cache_nearest_stop || !cache_distance || !stop_times)
+            if (!cache_nearest_stop || !cache_distance || !stop_times)
                 continue;
 
             // Here we are doing a nearest point search
@@ -385,7 +384,6 @@ void GPS::run()
                 }
                 else
                 {
-                    virtual_delay_int = -virtual_delay_int;
                     struct tm *timeinfo = std::gmtime(&virtual_delay_int);
                     std::strftime(buffer, CLOCK_TEXT_LENGTH, "+%H:%M", timeinfo);
                 }

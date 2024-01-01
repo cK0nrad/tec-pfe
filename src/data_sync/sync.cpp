@@ -39,6 +39,8 @@ void SyncClient::main_loop()
     while (!stop_flag)
     {
         run();
+        if(stop_flag)
+            break;
         sock = 0;
         std::this_thread::sleep_for(std::chrono::seconds(SLEEP_TIME));
     }
@@ -56,7 +58,7 @@ void SyncClient::run()
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
-        error_log("Socket creation error");
+        error_log("SYNC: Socket creation error");
         return;
     }
 
@@ -65,13 +67,13 @@ void SyncClient::run()
 
     if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0)
     {
-        error_log("Invalid address / Address not supported");
+        error_log("SYNC: Invalid address / Address not supported");
         return;
     }
 
     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
     {
-        error_log("Connection Failed");
+        error_log("SYNC: Connection Failed");
         return;
     }
 
@@ -86,7 +88,7 @@ void SyncClient::run()
         int ret = poll(&fds, 1, 1000);
         if (ret > 0)
         {
-            error_log("Error polling socket");
+            error_log("SYNC: Error polling socket");
             break;
         }
 
@@ -108,7 +110,7 @@ void SyncClient::run()
 
         if (rc == -1)
         {
-            error_log("Error sending data");
+            error_log("SYNC: Error sending data");
             break;
         }
         free((void *)girouette);

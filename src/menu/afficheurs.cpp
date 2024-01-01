@@ -334,8 +334,8 @@ Afficheurs::Afficheurs(int x, int y, int w, int h, Store *store, const char *l)
 
     int middle = (int)(WIDTH * 0.5 * .25);
 
-    Fl_Image *loupe_img = new Fl_BMP_Image("./src/assets/loupe.bmp");
-    Fl_Image *info_img = new Fl_BMP_Image("./src/assets/info.bmp");
+    loupe_img = new Fl_BMP_Image("./src/assets/loupe.bmp");
+    info_img = new Fl_BMP_Image("./src/assets/info.bmp");
 
     size_t pos = 0;
     buttons = (Fl_Button **)malloc(sizeof(Fl_Button *) * (10 + 2 + 3));
@@ -452,6 +452,11 @@ Afficheurs::~Afficheurs()
     Fl::delete_widget(quit);
     Fl::delete_widget(add_aff);
     Fl::delete_widget(replace_aff);
+
+    delete loupe_img;
+    delete info_img;
+    // loupe_img->release();
+    // info_img->release();
     free(buttons);
 }
 /////////
