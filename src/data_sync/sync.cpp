@@ -39,7 +39,7 @@ void SyncClient::main_loop()
     while (!stop_flag)
     {
         run();
-        if(stop_flag)
+        if (stop_flag)
             break;
         sock = 0;
         std::this_thread::sleep_for(std::chrono::seconds(SLEEP_TIME));
@@ -95,17 +95,20 @@ void SyncClient::run()
         GpsState t = store->get_gps_state();
         double lat = t.get_lat();
         double lon = t.get_lon();
+        size_t next_stop = store->get_next_stop_idx();
         const char *girouette = store->get_current_girouette().get_line_formatter();
 
         // forget about the \0 since it's not utf8
         size_t girouette_size = strlen(girouette);
 
         std::vector<char> buffer;
-        buffer.resize(sizeof(lat) + sizeof(lon) + (girouette_size));
+        buffer.resize(sizeof(lat) + sizeof(lon) + (girouette_size) + sizeof(next_stop));
+
         std::memcpy(buffer.data(), &lat, sizeof(lat));
         std::memcpy(buffer.data() + sizeof(lat), &lon, sizeof(lon));
-        std::memcpy(buffer.data() + sizeof(lat) + sizeof(lon), girouette, girouette_size);
-        
+        std::memcpy(buffer.data() + sizeof(lat) + sizeof(lon), &next_stop, sizeof(next_stop));
+        std::memcpy(buffer.data() + sizeof(lat) + sizeof(lon) + sizeof(next_stop), girouette, girouette_size);
+
         rc = send(sock, buffer.data(), buffer.size(), 0);
 
         if (rc == -1)

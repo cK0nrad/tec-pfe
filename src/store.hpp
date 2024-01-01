@@ -47,7 +47,7 @@ public:
     void go_to_next_stop();
     void go_to_prev_stop();
 
-    void set_stop_index(size_t idx);
+    void set_stop_index(size_t idx, bool refresh);
     void refresh_delay();
 
     // Getters (no pointer to avoid cross access over threads)

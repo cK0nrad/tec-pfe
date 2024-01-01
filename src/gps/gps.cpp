@@ -70,7 +70,7 @@ void GPS::main_loop()
             continue;
         }
 
-        store->set_stop_index(next_stop->idx);
+        store->set_stop_index(next_stop->idx, true);
         std::this_thread::sleep_for(std::chrono::seconds(WAIT_AFTER_ERROR));
     }
 }
@@ -136,6 +136,8 @@ void GPS::run()
             const StopTime *next_stop = trip_data.get_next_stop(values[0], values[1]);
             if (next_stop == nullptr)
                 continue;
+
+            store->set_stop_index(next_stop->idx, false);
 
             char *buffer = (char *)malloc(CLOCK_TEXT_LENGTH * sizeof(char));
             if (!buffer)

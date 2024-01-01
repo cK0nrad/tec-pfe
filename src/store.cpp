@@ -77,6 +77,7 @@ void Store::stop_service()
     std::string id("01");
     std::string text("HORS SERVICE");
     std::string line("");
+    next_stop_idx = 0;
     for (auto it = afficheurs->begin(); it != afficheurs->end(); ++it)
         delete *it;
     afficheurs->clear();
@@ -332,6 +333,7 @@ void Store::set_trip(TripData *trip)
     free((void *)current_trip);
     current_trip = trip;
     line_active = true;
+    next_stop_idx = 0;
     refresh_gui();
 }
 
@@ -355,7 +357,6 @@ void Store::refresh_stop()
     refresh_delay_unsecure();
     next_stop = stop->stop_name;
     next_stop_time = get_arrival_time(stop);
-    refresh_gui();
 }
 
 void Store::go_to_next_stop()
@@ -371,6 +372,7 @@ void Store::go_to_next_stop()
     next_stop_overwrite = true;
     next_stop_idx++;
     refresh_stop();
+    refresh_gui();
 }
 
 void Store::go_to_prev_stop()
@@ -385,16 +387,19 @@ void Store::go_to_prev_stop()
     next_stop_overwrite = true;
     next_stop_idx--;
     refresh_stop();
+    refresh_gui();
 }
 
-void Store::set_stop_index(size_t idx)
+void Store::set_stop_index(size_t idx, bool refresh )
 {
     std::unique_lock<std::shared_mutex> lock(mutex);
     size_t max_size = current_trip->get_stop_times()->size() - 1;
     if (idx > max_size)
         idx = max_size;
     next_stop_idx = idx;
-    refresh_stop();
+    if (refresh)
+        refresh_stop();
+    refresh_gui();
 }
 
 void Store::refresh_delay_unsecure()
