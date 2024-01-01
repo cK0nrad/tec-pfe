@@ -1,5 +1,7 @@
 #include "afficheurs.hpp"
 #include "../sqlite/afficheur_data.hpp"
+#include "../sqlite/trip_data.hpp"
+#include "../sqlite/request_manager.hpp"
 #include "../layout.hpp"
 #include "../store.hpp"
 
@@ -16,6 +18,7 @@
 
 static const int AFFICEHURS_KEYPADS[15] = {0, 1, 2, 3, 4, 10, 5, 6, 7, 8, 9, 11, 12, 13, 14};
 static const char *AFFICEHURS_KEYPADS_LABEL[12] = {"0", "1", "2", "3", "4", "←", "5", "6", "7", "8", "9", ""};
+static int max_vertical_scroll(Fl_Scroll *scroller);
 
 static void delete_btn_cb(Fl_Widget *, void *data)
 {
@@ -29,7 +32,7 @@ void Afficheurs::delete_afficheur()
     free_popup();
 }
 
-int max_vertical_scroll(Fl_Scroll *scroller)
+static int max_vertical_scroll(Fl_Scroll *scroller)
 {
     int max_y = 0;
     for (int i = 0; i < scroller->children(); ++i)
@@ -119,7 +122,9 @@ void Afficheurs::list_afficheurs()
 
     DragButton *new_button = nullptr;
     size_t idx = 0;
-    for (auto a : *store->get_girouettes())
+
+    std::list<AfficheurData *> *afficheurs = store->get_girouettes();
+    for (auto a : *afficheurs)
     {
         char *line = a->get_line_formatter();
         printf("%s \n", line);
@@ -133,7 +138,6 @@ void Afficheurs::list_afficheurs()
         new_button->box(FL_BORDER_BOX);
         new_button->selection_color(FL_DARK_BLUE);
 
-        // if(*store->get_girouettes()->size() > 0)
         PassingVal *val = (PassingVal *)malloc(sizeof(PassingVal));
         if (!val)
             throw std::bad_alloc();
@@ -144,7 +148,10 @@ void Afficheurs::list_afficheurs()
         scroller->add(new_button);
         afficheur_btn->push_back(new_button);
         y_position += 50;
+        delete a; // not using a anymore
     }
+    delete afficheurs;
+
     int max_scroll = max_vertical_scroll(scroller);
 
     for (auto a : *afficheur_btn)
@@ -209,7 +216,7 @@ void Afficheurs::free_list_popup()
     delete_btn->hide();
     for (size_t a = 0; a < (10 + 2 + 3); a++)
         buttons[a]->activate();
-        
+
     for (auto a : *afficheur_btn)
     {
         free(a->user_data());
@@ -517,7 +524,7 @@ void Afficheurs::draw()
 
     fl_font(FL_HELVETICA_BOLD, 24);
 
-    const char *line = store->get_current_girouette()->get_formatter();
+    const char *line = store->get_current_girouette().get_formatter();
     fl_draw(line, middle - 3, 2 * TABS_HEIGHT + 13, (int)(WIDTH * 0.75) + 6, 3 * TABS_HEIGHT - 20, FL_ALIGN_CENTER);
     free((void *)line);
 

@@ -1,5 +1,11 @@
 #define SOCKET_PATH "/tmp/tec_gps.socket"
 #include "gps.hpp"
+#include "../store.hpp"
+#include "../sqlite/trip_data.hpp"
+#include "../sqlite/afficheur_data.hpp"
+#include "../sqlite/request_manager.hpp"
+
+
 #include <thread>
 #include <vector>
 #include <sys/socket.h>
@@ -37,16 +43,15 @@ void GPS::main_loop()
         tc -= 1;
         store->set_gps_status(GPSStatus::ERROR);
 
-        // If there's an error, rely on the theorical data
-        // and offset as the driver decide
-        const TripData *trip_data = store->get_current_trip();
-        if (trip_data == nullptr)
+        // If there's no trip, no need to continue
+        if (!store->is_line_active())
         {
             std::this_thread::sleep_for(std::chrono::seconds(WAIT_AFTER_ERROR));
             continue;
         }
 
-        const StopTime *next_stop = trip_data->get_theorical_stop();
+        TripData trip_data = store->get_current_trip();
+        const StopTime *next_stop = trip_data.get_theorical_stop();
         if (next_stop == nullptr)
         {
             std::this_thread::sleep_for(std::chrono::seconds(WAIT_AFTER_ERROR));
@@ -118,11 +123,9 @@ void GPS::run()
 
         if (store->is_line_active())
         {
-            const TripData *trip_data = store->get_current_trip();
-            if (trip_data == nullptr)
-                continue;
+            TripData trip_data = store->get_current_trip();
 
-            const StopTime *next_stop = trip_data->get_next_stop(values[0], values[1]);
+            const StopTime *next_stop = trip_data.get_next_stop(values[0], values[1]);
             if (next_stop == nullptr)
                 continue;
 
@@ -142,7 +145,7 @@ void GPS::run()
             // using shape instead of stops location to get more accurate results
             // it's run every second so it's not a big deal
 
-            const StopTime *th = trip_data->get_theorical_stop();
+            const StopTime *th = trip_data.get_theorical_stop();
             if (th == nullptr)
                 continue;
 
@@ -150,10 +153,10 @@ void GPS::run()
             struct tm *timeinfo = std::localtime(&rawtime);
             int current_time = timeinfo->tm_hour * 3600 + timeinfo->tm_min * 60 + timeinfo->tm_sec;
 
-            const std::vector<size_t> *cache_nearest_shape = trip_data->get_cache_nearest_shape();
-            const std::vector<size_t> *cache_nearest_stop = trip_data->get_cache_nearest_stop();
-            const std::vector<double> *cache_distance = trip_data->get_cache_stop_distances();
-            const std::vector<StopTime *> *stop_times = trip_data->get_stop_times();
+            const std::vector<size_t> *cache_nearest_shape = trip_data.get_cache_nearest_shape();
+            const std::vector<size_t> *cache_nearest_stop = trip_data.get_cache_nearest_stop();
+            const std::vector<double> *cache_distance = trip_data.get_cache_stop_distances();
+            const std::vector<StopTime *> *stop_times = trip_data.get_stop_times();
 
             if (!cache_nearest_shape || !cache_nearest_stop || !cache_distance || !stop_times)
                 continue;
@@ -161,7 +164,7 @@ void GPS::run()
             // Here we are doing a nearest point search
             //  which is also done when we get the next stop
             //  so we could just used it, but nevermind
-            const std::vector<Point *> *shape = trip_data->get_shape();
+            const std::vector<Point *> *shape = trip_data.get_shape();
 
             size_t nearest_point = 0;
             double smallest = INFINITY;

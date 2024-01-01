@@ -2,7 +2,8 @@
 #define CURRENT_TIME
 
 #include <FL/Fl_Box.H>
-#include "../store.hpp"
+
+class Store;
 
 class TECClock : public Fl_Box
 {
@@ -11,6 +12,7 @@ public:
     ~TECClock();
     void update();
     void draw();
+
 private:
     Store *store;
 };

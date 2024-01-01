@@ -3,7 +3,7 @@ CXX=g++
 CFLAGS=-Wall -Wextra -pthread -O0 -std=c++17  -g
 
 # OSS - operational support system 
-SRC_DIRS := src src/gui src/menu src/components src/sqlite src/gps src/girouette 
+SRC_DIRS := src src/gui src/menu src/components src/sqlite src/gps src/girouette src/data_sync
 SOURCES := $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.cpp))
 SOURCESH := $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.hpp))
 OBJECTS := $(SOURCES:.cpp=.o)

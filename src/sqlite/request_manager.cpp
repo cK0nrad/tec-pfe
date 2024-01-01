@@ -7,12 +7,17 @@ extern "C"
 #endif
 
 #include "request_manager.hpp"
+#include "trip_data.hpp"
+#include "afficheur_data.hpp"
+
 #include <list>
 #include <shared_mutex>
 #include <mutex>
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
+
+
 
 RequstManager::RequstManager() : is_open(false), db(nullptr), errMsg(nullptr), rc(0)
 {

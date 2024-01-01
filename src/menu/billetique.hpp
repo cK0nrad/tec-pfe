@@ -3,7 +3,8 @@
 
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Button.H>
-#include "../store.hpp"
+
+class Store; 
 
 class Billetique : public Fl_Group
 {

@@ -6,12 +6,18 @@
 #include "layout.hpp"
 
 // Get our custom elements
+#include "sqlite/request_manager.hpp"
+
 #include "gui/custom_tabs.hpp"
 #include "gui/custom_group.hpp"
 #include "gui/time.hpp"
 
 #include "gps/gps.hpp"
 #include "girouette/girouette.hpp"
+#include "data_sync/sync.hpp"
+
+#include "store.hpp"
+
 
 int main()
 {
@@ -21,8 +27,13 @@ int main()
     GPS *gps_receiver = new GPS(store);
     gps_receiver->start();
 
+    // Start Girouett thread
     Girouette *girouette = new Girouette(store);
     girouette->start();
+
+    // Start Girouett thread
+    SyncClient *data_sync = new SyncClient(store);
+    data_sync->start();
 
     Fl_Double_Window *window = new Fl_Double_Window(WIDTH, HEIGHT);
     window->color(FL_BLACK);
@@ -42,6 +53,7 @@ int main()
     int err_code = Fl::run();
 
     // Stop GPS & girouette thread
+    delete data_sync;
     delete gps_receiver;
     delete girouette;
 

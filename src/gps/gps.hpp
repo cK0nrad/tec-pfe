@@ -1,7 +1,6 @@
 #ifndef GPSD
 #define GPSD
 
-#include "../store.hpp"
 #include <thread>
 #include <chrono>
 #include <sys/socket.h>
@@ -9,6 +8,10 @@
 #include <unistd.h>
 #include <iostream>
 
+class Store;
+
+struct StopTime;
+struct Point;
 class GPS
 {
 public:

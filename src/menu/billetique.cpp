@@ -1,6 +1,9 @@
 #include "billetique.hpp"
 #include "../layout.hpp"
 #include "../store.hpp"
+#include "../sqlite/request_manager.hpp"
+#include "../sqlite/trip_data.hpp"
+#include "../sqlite/afficheur_data.hpp"
 
 #include <FL/Fl_Button.H>
 #include <FL/fl_draw.H>
@@ -258,7 +261,7 @@ void Billetique::draw()
     if (!values)
         throw std::bad_alloc();
 
-    values[0] = store->is_line_active() ? store->get_current_trip()->get_trip_id().c_str() : std::string("/");
+    values[0] = store->is_line_active() ? store->get_current_trip().get_trip_id().c_str() : std::string("/");
     values[1] = store->get_dir();
     values[2] = store->get_region();
     values[3] = store->get_zone();

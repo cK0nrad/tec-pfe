@@ -3,8 +3,11 @@
 */
 
 #include "ordibus.hpp"
-#include "../layout.hpp"
 #include "../store.hpp"
+#include "../layout.hpp"
+#include "../sqlite/trip_data.hpp"
+#include "../sqlite/afficheur_data.hpp"
+#include "../sqlite/request_manager.hpp"
 
 #include <FL/Fl.H>
 #include <FL/Fl_Group.H>

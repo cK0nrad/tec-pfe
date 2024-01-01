@@ -15,12 +15,12 @@
 #include <mutex>
 #include <shared_mutex>
 
-
 #define SOCKET_PATH "/tmp/tec_gps.socket"
 
 #define FAKE_LENGTH 1083
 // very, very bad practive but I don't want to make
 // sqlite3 work on the emulator
+
 const double POSITION[][2] = {
     {50.728208, 5.351142},
     {50.728206, 5.35115},
@@ -1150,6 +1150,7 @@ private:
     double coords[2] = {0, 0};
     mutable std::shared_mutex mutex;
 };
+void handle_client(int client_fd, FakeGPS *gps);
 
 void handle_client(int client_fd, FakeGPS *gps)
 {

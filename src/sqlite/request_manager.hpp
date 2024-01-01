@@ -12,8 +12,27 @@ extern "C"
 #include <list>
 #include <shared_mutex>
 #include <cstring>
-#include "../sqlite/afficheur_data.hpp"
-#include "../sqlite/trip_data.hpp"
+#include <vector>
+
+class TripData;
+class AfficheurData;
+
+struct Point
+{
+    double lat;
+    double long_;
+};
+
+struct StopTime
+{
+    std::string stop_id;
+    std::string stop_name;
+    StopTime *next;
+    Point position;
+    bool is_end;
+    int arrival_time;
+    size_t idx;
+};
 
 class RequstManager
 {
@@ -23,7 +42,7 @@ public:
     bool open();
     std::list<AfficheurData *> *get_afficheur(const char *like_name);
     TripData *get_trip(const char *trip_id);
-    
+
 private:
     std::vector<StopTime *> *get_stop_times(const char *trip_id);
     std::vector<Point *> *get_shape(const char *shape_id);

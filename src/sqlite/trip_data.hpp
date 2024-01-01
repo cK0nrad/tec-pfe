@@ -8,24 +8,8 @@
 double earth_distance(double lat1, double lon1, double lat2, double lon2);
 double sqr_distance(double lat1, double lon1, double lat2, double lon2);
 
-
-
-typedef struct Point_t
-{
-    double lat;
-    double long_;
-} Point;
-
-typedef struct StopTime_t
-{
-    std::string stop_id;
-    std::string stop_name;
-    StopTime_t *next;
-    Point position;
-    bool is_end;
-    int arrival_time;
-    size_t idx;
-} StopTime;
+struct StopTime;
+struct Point;
 
 class TripData
 {
@@ -39,6 +23,7 @@ public:
         std::string route_long_name,
         std::vector<Point *> *shape,
         std::vector<StopTime *> *stops_times);
+    TripData(const TripData *trip);
     ~TripData();
     std::string get_trip_id() const;
     std::string get_afficheur_id() const;
@@ -53,7 +38,7 @@ public:
     const std::vector<size_t> *get_cache_nearest_shape() const;
     const std::vector<double> *get_cache_stop_distances() const;
     const std::vector<Point *> *get_shape() const;
-    
+
 private:
     std::string trip_id;
     std::string route_id;

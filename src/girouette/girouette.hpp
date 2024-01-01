@@ -1,8 +1,10 @@
 #ifndef GIROUETTE
 #define GIROUETTE
 
-#include "../store.hpp"
 #include <thread>
+
+class Store;
+
 class Girouette
 {
 public:

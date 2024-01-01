@@ -36,7 +36,7 @@ void Girouette::main_loop()
     printf("Girouette thread started\n");
     while (!stop_flag)
     {
-        if(current_index >= store->get_girouettes()->size())
+        if(current_index >= store->get_girouettes_size())
         {
             current_index = 0;
         }

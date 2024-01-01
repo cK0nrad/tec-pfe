@@ -4,15 +4,16 @@ Thread safe
 
 This could be splitted into multiple files to improve readability
 */
-
-#include "type.hpp"
 #include "store.hpp"
+#include "type.hpp"
 #include <FL/Fl_Widget.H>
 #include <cstring>
 #include <mutex>
 #include <list>
 #include <shared_mutex>
 #include "sqlite/request_manager.hpp"
+#include "sqlite/afficheur_data.hpp"
+#include "sqlite/trip_data.hpp"
 
 Store::Store() : gps_state(new GpsState(0, 0, GPSStatus::STARTING)),
                  line_active(false),
@@ -231,15 +232,13 @@ bool Store::is_line_active() const
     return line_active;
 }
 
-// this is not thread safe (but doesn't really matter here since only T1 access it)
 //  The pointer should not be freed
-const GpsState *Store::get_gps_state() const
+GpsState Store::get_gps_state() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
-    return gps_state;
+    return GpsState(gps_state);
 }
 
-// this is not thread safe (but doesn't really matter here since only T1 access it)
 std::string Store::get_current_line() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
@@ -277,23 +276,33 @@ std::string Store::get_odm() const
 }
 
 // this is not thread safe (but doesn't really matter here since only T1 access it)
-const AfficheurData *Store::get_current_girouette() const
+AfficheurData Store::get_current_girouette() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
     return current_girouette;
 }
-// this is not thread safe (but doesn't really matter here since only T1 access it)
-const std::list<AfficheurData *> *Store::get_girouettes() const
+
+size_t Store::get_girouettes_size() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
+    return afficheurs->size();
+}
+
+
+std::list<AfficheurData *> *Store::get_girouettes() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex);
+    std::list<AfficheurData *> *afficheurs = new std::list<AfficheurData *>();
+    for (auto it = this->afficheurs->begin(); it != this->afficheurs->end(); ++it)
+        afficheurs->push_back(new AfficheurData(*it));
+
     return afficheurs;
 }
 
-// this is not thread safe (but doesn't really matter here since only T1 access it)
-const TripData *Store::get_current_trip() const
+TripData Store::get_current_trip() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
-    return current_trip;
+    return TripData(current_trip);
 }
 
 std::string Store::get_next_stop() const

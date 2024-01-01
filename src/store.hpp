@@ -5,7 +5,10 @@
 #include <shared_mutex>
 #include <list>
 #include <FL/Fl_Widget.H>
-#include "sqlite/request_manager.hpp"
+
+class RequstManager;
+class AfficheurData;
+class TripData;
 
 class Store
 {
@@ -40,12 +43,13 @@ public:
     void reset_girouette();
 
     void stop_service();
-    
-    // Getters
-    const GpsState *get_gps_state() const;
+
+    // Getters (no pointer to avoid cross access over threads)
+    // less efficient but safer
+    GpsState get_gps_state() const;
     bool is_line_active() const;
 
-    const TripData *get_current_trip() const;
+    TripData get_current_trip() const;
 
     std::string get_current_line() const;
     std::string get_dir() const;
@@ -57,8 +61,9 @@ public:
     std::string get_next_stop() const;
     std::string get_next_stop_time() const;
 
-    const AfficheurData *get_current_girouette() const;
-    const std::list<AfficheurData *> *get_girouettes() const;
+    AfficheurData get_current_girouette() const;
+    std::list<AfficheurData *> *get_girouettes() const;
+    size_t get_girouettes_size() const;
     std::string get_delay() const;
 
     // independant thread safety

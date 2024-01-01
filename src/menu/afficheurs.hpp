@@ -5,8 +5,10 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Button.H>
-#include "../store.hpp"
 #include <list>
+
+class Store;
+class AfficheurData;
 
 class DragButton : public Fl_Button
 {

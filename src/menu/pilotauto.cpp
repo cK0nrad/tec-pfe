@@ -6,6 +6,8 @@
 #include "../layout.hpp"
 #include "../store.hpp"
 #include "../type.hpp"
+#include "../sqlite/trip_data.hpp"
+#include "../sqlite/afficheur_data.hpp"
 
 #define MARGIN 10
 
@@ -60,7 +62,7 @@ void Pilotauto::draw()
 
     fl_draw("Etat", current_x, 3 * TABS_HEIGHT);
 
-    GPSStatus status = store->get_gps_state()->get_status();
+    GPSStatus status = store->get_gps_state().get_status();
     const char *status_text = nullptr;
     switch (status)
     {
@@ -90,7 +92,7 @@ void Pilotauto::draw()
 
     fl_draw("Afficheurs extérieurs", 15, 5 * TABS_HEIGHT);
 
-    const char *formatted = store->get_current_girouette()->get_formatter();
+    const char *formatted = store->get_current_girouette().get_formatter();
     fl_draw(formatted, 15, 5 * TABS_HEIGHT + MARGIN, 560, TABS_HEIGHT, FL_ALIGN_CENTER);
     free((void *)formatted);
 

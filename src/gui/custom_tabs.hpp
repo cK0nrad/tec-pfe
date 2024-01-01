@@ -4,7 +4,8 @@
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Box.H>
 #include "custom_group.hpp"
-#include "../store.hpp"
+
+class Store;
 
 class TECTabs : public TECGroup
 {
