@@ -7,6 +7,7 @@
 #include <sys/un.h>
 #include <unistd.h>
 #include <iostream>
+#include <list>
 
 class Store;
 
@@ -25,7 +26,12 @@ private:
     void main_loop();
     void await();
     void run();
+    double get_average();
+    void add_to_average(Point point);
     
+    //easier to popup than a vector
+    std::list<Point> gps_position;
+
     int stop_flag = 0;
     std::thread thread;
     int tc;

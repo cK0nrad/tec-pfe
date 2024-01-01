@@ -84,7 +84,6 @@ static void quit_popup(Fl_Widget *, void *parent)
 static void change_selection(Fl_Widget *, void *val)
 {
     PassingVal *ptr = (PassingVal *)val;
-    printf("Change selection %zu\n", (size_t)ptr->ptr);
     ((Afficheurs *)(ptr->parent))->change_active((size_t)ptr->ptr);
 }
 
@@ -127,8 +126,6 @@ void Afficheurs::list_afficheurs()
     for (auto a : *afficheurs)
     {
         char *line = a->get_line_formatter();
-        printf("%s \n", line);
-
         new_button = new DragButton(
             middle_point_x - 2 * (int)(POPUP_WIDTH * .8 * .5),
             middle_point_y - POPUP_HEIGHT + y_position,

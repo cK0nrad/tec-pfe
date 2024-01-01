@@ -1163,7 +1163,7 @@ void handle_client(int client_fd, FakeGPS *gps)
         struct pollfd fds;
         fds.fd = client_fd;
         fds.events = POLLIN;
-        int ret = poll(&fds, 1, 150);
+        int ret = poll(&fds, 1, 1000);
         if (ret > 0)
         {
             std::cout << "Client disconnected or error occurred" << std::endl;

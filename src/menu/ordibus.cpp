@@ -8,6 +8,7 @@
 #include "../sqlite/trip_data.hpp"
 #include "../sqlite/afficheur_data.hpp"
 #include "../sqlite/request_manager.hpp"
+#include "../logs.hpp"
 
 #include <FL/Fl.H>
 #include <FL/Fl_Group.H>
@@ -19,6 +20,7 @@
 #define BUTTON_WIDTH 80
 #define BUTTON_FONT_SIZE 50
 #define ORDIBUS_SIZE_LIMIT 15
+
 //((WIDTH - BUTTON_WIDTH) * 0.5) - BUTTON_WIDTH
 #define CENTER_OFFSET 280
 
@@ -76,7 +78,6 @@ void Ordibus::init_route()
     char *id = get_route_id();
     TripData *trip = store->get_request_manager()->get_trip(id);
     free((void *)id);
-
     route_id.clear();
 
     if (trip)
@@ -93,7 +94,9 @@ void Ordibus::init_route()
         }
 
         AfficheurData *afficheur_data = results->front();
-        printf("Afficheur %s\n", afficheur_data->get_id().c_str());
+        char buffer[32];
+        sprintf(buffer, "Afficheur %s", afficheur_data->get_id().c_str());
+        info_log(buffer);
 
         store->set_trip(trip);
         store->replace_girouette(afficheur_data);

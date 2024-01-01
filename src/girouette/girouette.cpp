@@ -1,5 +1,7 @@
 #include "girouette.hpp"
 #include "../store.hpp"
+#include "../logs.hpp"
+
 #include <chrono>
 
 #define SLEEP_TIME 5
@@ -33,7 +35,8 @@ void Girouette::start()
 void Girouette::main_loop()
 {
     current_index = 0;
-    printf("Girouette thread started\n");
+    
+    info_log("Girouette thread started");
     while (!stop_flag)
     {
         if(current_index >= store->get_girouettes_size())
