@@ -422,12 +422,12 @@ void Store::refresh_delay_unsecure()
     {
         total_delay = -total_delay;
         struct tm *timeinfo = std::gmtime(&total_delay);
-        std::strftime(buffer, CLOCK_TEXT_LENGTH, "+%H:%M", timeinfo);
+        std::strftime(buffer, CLOCK_TEXT_LENGTH, "-%H:%M", timeinfo);
     }
     else
     {
         struct tm *timeinfo = std::gmtime(&total_delay);
-        std::strftime(buffer, CLOCK_TEXT_LENGTH, "-%H:%M", timeinfo);
+        std::strftime(buffer, CLOCK_TEXT_LENGTH, "+%H:%M", timeinfo);
     }
     delay = std::string(buffer);
 
