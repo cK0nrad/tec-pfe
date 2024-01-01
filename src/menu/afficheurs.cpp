@@ -17,7 +17,7 @@
 static const int AFFICEHURS_KEYPADS[15] = {0, 1, 2, 3, 4, 10, 5, 6, 7, 8, 9, 11, 12, 13, 14};
 static const char *AFFICEHURS_KEYPADS_LABEL[12] = {"0", "1", "2", "3", "4", "←", "5", "6", "7", "8", "9", ""};
 
-static void delete_btn_cb(Fl_Widget *widget, void *data)
+static void delete_btn_cb(Fl_Widget *, void *data)
 {
     Afficheurs *aff = (Afficheurs *)data;
     aff->delete_afficheur();
@@ -106,7 +106,7 @@ void Afficheurs::list_afficheurs()
 {
     if (popup_list || popup)
         return;
-    
+
     for (size_t a = 0; a < (10 + 2 + 3); a++)
     {
         buttons[a]->deactivate();
@@ -207,7 +207,9 @@ void Afficheurs::free_list_popup()
     quit->hide();
     scroller->hide();
     delete_btn->hide();
-
+    for (size_t a = 0; a < (10 + 2 + 3); a++)
+        buttons[a]->activate();
+        
     for (auto a : *afficheur_btn)
     {
         free(a->user_data());
