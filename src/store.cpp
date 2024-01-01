@@ -278,7 +278,6 @@ std::string Store::get_odm() const
 AfficheurData Store::get_current_girouette() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
-    printf("get_current_girouette\n");
     return AfficheurData(current_girouette);
 }
 
