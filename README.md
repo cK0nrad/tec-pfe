@@ -61,6 +61,9 @@ It was just a POC, so I did it in few nights (~30h with 6h-8h of fltk doc readin
 
 ## Video
 
+https://github.com/cK0nrad/tec-pfe/assets/13602291/8c4d4a7b-a1e0-47fb-af42-b76a7897599e
+
+
 ## Credits
 
 - TEC employees on TikTok for the UI
