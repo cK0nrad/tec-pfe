@@ -11,6 +11,10 @@ Compatible with RaspPI 4
 
 This repository has been published in the absence of any discovered patents or copyright records for terms including "letec pfe," "otw pfe," "srwt pfe," "letec sae," among others in various combinations. Should there exist a patent or any other form of intellectual property that this repository infringes upon, please reach out to me. Upon verification, I will promptly remove the repository.
 
+## Video
+
+https://github.com/cK0nrad/tec-pfe/assets/13602291/8c4d4a7b-a1e0-47fb-af42-b76a7897599e
+
 ## Hierarchy
 
 This is most likely spaghetti code, but it works. It wasn't mean to be really maintainable but most of the codebase can be splitted into serval submodule without difficulties.
@@ -57,12 +61,6 @@ It was just a POC, so I did it in few nights (~30h with 6h-8h of fltk doc readin
 ![billetique](https://raw.githubusercontent.com/cK0nrad/tec-pfe/main/screenshot/billetique.jpg)
 ![ordibus](https://raw.githubusercontent.com/cK0nrad/tec-pfe/main/screenshot/ordibus.jpg)
 ![AutoPilot](https://raw.githubusercontent.com/cK0nrad/tec-pfe/main/screenshot/Capture.jpg)
-
-
-## Video
-
-https://github.com/cK0nrad/tec-pfe/assets/13602291/8c4d4a7b-a1e0-47fb-af42-b76a7897599e
-
 
 ## Credits
 
