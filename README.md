@@ -7,6 +7,12 @@ Equivalent to an ITS or OSS.
 Assuming a Linux distros
 Compatible with RaspPI 4
 
+## Oversight
+
+The delay is wrongly computed in this implementation and is about to get fixed.
+
+You can check how it should have been done [on my blog](https://ckonrad.io/tec-pfe-4)
+
 ## Intellectual Property Notice
 
 This repository has been published in the absence of any discovered patents or copyright records for terms including "letec pfe," "otw pfe," "srwt pfe," "letec sae," among others in various combinations. Should there exist a patent or any other form of intellectual property that this repository infringes upon, please reach out to me. Upon verification, I will promptly remove the repository.
