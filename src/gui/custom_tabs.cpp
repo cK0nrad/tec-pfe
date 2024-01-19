@@ -67,7 +67,7 @@ TECTabs::TECTabs(int x, int y, int w, int h, Store *store, const char *l)
         size_t *data = new size_t;
         *data = i;
         btn->user_data(data);
-        if (i == 4)
+        if (i == 1 || i == 4)
             btn->deactivate();
         btn->callback(change_tab_cb, data); // pass twice the address to free later
     }

@@ -3,8 +3,8 @@
 
 #include <FL/Fl.H>
 
-const Fl_Color SECONDARY = fl_rgb_color(76, 80, 107);
-const Fl_Color SECONDARY_LIGHT = fl_rgb_color(121, 125, 151);
+const Fl_Color SECONDARY = fl_rgb_color(25, 24, 37);
+const Fl_Color SECONDARY_LIGHT = fl_rgb_color(0,0,0);
 const Fl_Color PRIMARY = FL_BLACK;
 
 #define WIDTH 800

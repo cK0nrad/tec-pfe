@@ -222,7 +222,7 @@ void Ordibus::draw()
 
         fl_font(FL_HELVETICA_BOLD, 20);
         fl_color(FL_WHITE);
-        fl_draw("Trip ID:", CENTER_OFFSET - 120, (int)(2.5 * TABS_HEIGHT), 120, TABS_HEIGHT, FL_ALIGN_CENTER);
+        fl_draw("Parcours:", CENTER_OFFSET - 120, (int)(2.5 * TABS_HEIGHT), 120, TABS_HEIGHT, FL_ALIGN_CENTER);
     }
 
     fl_line_style(FL_SOLID, 3);
@@ -238,7 +238,7 @@ void Ordibus::draw()
     if (error)
     {
         fl_color(FL_RED);
-        fl_draw("Invalid trip ID", CENTER_OFFSET, (int)(2.5 * TABS_HEIGHT), 3 * BUTTON_WIDTH, TABS_HEIGHT, FL_ALIGN_CENTER);
+        fl_draw("Parcours invalide.", CENTER_OFFSET, (int)(2.5 * TABS_HEIGHT), 3 * BUTTON_WIDTH, TABS_HEIGHT, FL_ALIGN_CENTER);
         return;
     }
 }

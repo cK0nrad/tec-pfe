@@ -28,9 +28,15 @@ private:
     void run();
     double get_average();
     void add_to_average(Point point);
-    
-    //easier to popup than a vector
-    std::list<Point> gps_position;
+    void get_delay(
+        long current_time,
+        int next_stops_time[2],
+        double remaining_distance,
+        double total_next_distance);
+
+    // easier to popup than a vector
+    std::list<Point>
+        gps_position;
 
     int stop_flag = 0;
     std::thread thread;

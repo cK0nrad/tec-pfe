@@ -37,8 +37,8 @@ int main()
 
     Fl_Double_Window *window = new Fl_Double_Window(WIDTH, HEIGHT);
     window->color(FL_BLACK);
-    window->default_cursor(FL_CURSOR_NONE);
-    window->cursor(FL_CURSOR_NONE);
+    // window->default_cursor(FL_CURSOR_NONE);
+    // window->cursor(FL_CURSOR_NONE);
 
     TECClock *clock = new TECClock(0, 0, WIDTH, TABS_HEIGHT, store);
     clock->color(PRIMARY);

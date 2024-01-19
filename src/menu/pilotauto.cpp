@@ -52,7 +52,7 @@ Pilotauto::Pilotauto(int x, int y, int w, int h, Store *store, const char *l)
     Fl_Group *menu = new Fl_Group(0, 2 * TABS_HEIGHT, WIDTH, HEIGHT - 2 * TABS_HEIGHT);
     size_t bottom = h + y;
 
-    overwrite = new Fl_Button(15 + 560 + 15 + 25, bottom - 3 * TABS_HEIGHT - 75, 2 * 75 + 20, 75, "REPRENDRE TRAJET");
+    overwrite = new Fl_Button(15 + 560 + 15 + 25, bottom - 3 * TABS_HEIGHT - 75, 2 * 75 + 20, 75, "REPRISE THEORIQUE");
     overwrite->labelsize(16);
     overwrite->callback(overwrite_cb, store);
     overwrite->deactivate();

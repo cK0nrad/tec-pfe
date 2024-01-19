@@ -77,8 +77,6 @@ public:
     bool is_next_stop_overwrite() const;
     size_t get_next_stop_idx() const;
 
-
-
 private:
     void refresh_delay_unsecure();
     void refresh_gui();
@@ -95,9 +93,9 @@ private:
 
     std::string next_stop;
     std::string next_stop_time;
+
     bool next_stop_overwrite;
     size_t next_stop_idx;
-
 
     std::string current_line;
     std::string dir;

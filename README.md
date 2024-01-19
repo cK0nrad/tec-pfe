@@ -7,12 +7,6 @@ Equivalent to an ITS or OSS.
 Assuming a Linux distros
 Compatible with RaspPI 4
 
-## Oversight
-
-The delay is wrongly computed in this implementation and is about to get fixed.
-
-You can check how it should have been done [on my blog](https://ckonrad.io/tec-pfe-4)
-
 ## Intellectual Property Notice
 
 This repository has been published in the absence of any discovered patents or copyright records for terms including "letec pfe," "otw pfe," "srwt pfe," "letec sae," among others in various combinations. Should there exist a patent or any other form of intellectual property that this repository infringes upon, please reach out to me. Upon verification, I will promptly remove the repository.
@@ -44,24 +38,7 @@ This is most likely spaghetti code, but it works. It wasn't mean to be really ma
 
 The database is not a perfect GTFS replica, but it do work the same way.
 
-## Skills
-
-This project is meant to demonstrate skills abilities (and also because I do a lot of TEC clones/data analysis) such as :
-
-- C++
-- FLTK
-- Linux
-- Sqlite
-- Git
-- Multi-threading 
-- Sockets (uds here)
-- IPC (due to uds)
-
-## Time spent
-
-It was just a POC, so I did it in few nights (~30h with 6h-8h of fltk doc reading) to experiment with FLTK and clone TEC OSS.
-
-## Screenshot
+## Screenshots
 
 ![afficheur](https://raw.githubusercontent.com/cK0nrad/tec-pfe/main/screenshot/afficheur.jpg)
 ![billetique](https://raw.githubusercontent.com/cK0nrad/tec-pfe/main/screenshot/billetique.jpg)
@@ -71,4 +48,3 @@ It was just a POC, so I did it in few nights (~30h with 6h-8h of fltk doc readin
 ## Credits
 
 - TEC employees on TikTok for the UI
-- cKonrad (aka. me)

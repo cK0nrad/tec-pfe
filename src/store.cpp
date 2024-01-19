@@ -346,6 +346,8 @@ std::string Store::get_delay() const
 void Store::stop_overwrite()
 {
     std::unique_lock<std::shared_mutex> lock(mutex);
+    if (!line_active)
+        return;
     next_stop_overwrite = false;
     next_stop_idx = current_trip->get_theorical_stop()->idx;
     refresh_stop();
@@ -390,7 +392,7 @@ void Store::go_to_prev_stop()
     refresh_gui();
 }
 
-void Store::set_stop_index(size_t idx, bool refresh )
+void Store::set_stop_index(size_t idx, bool refresh)
 {
     std::unique_lock<std::shared_mutex> lock(mutex);
     size_t max_size = current_trip->get_stop_times()->size() - 1;
